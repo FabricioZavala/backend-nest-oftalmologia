@@ -1,0 +1,624 @@
+{
+  "info": {
+    "name": "Backend Oftalmología NestJS",
+    "description": "Colección completa de endpoints para el sistema de oftalmología con roles y permisos",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/v1/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "roleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "moduleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "permissionId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', response.data.refreshToken);",
+                  "    pm.collectionVariables.set('userId', response.data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Get Me User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/get-me-user",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "get-me-user"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎭 Roles",
+      "item": [
+        {
+          "name": "Create Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('roleId', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"Administrator\",\n  \"description\": \"Full system access\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/get-all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "get-all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Role by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/{{roleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "{{roleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleName\": \"Super Administrator\",\n  \"description\": \"Updated description\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/update/{{roleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "update", "{{roleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles/delete/{{roleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "delete", "{{roleId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Modules",
+      "item": [
+        {
+          "name": "Create Module",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('moduleId', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleName\": \"Usuarios\",\n  \"description\": \"Gestión de usuarios del sistema\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/module/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["module", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get All Modules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/module/get-all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["module", "get-all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Module by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/module/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["module", "{{moduleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Module",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleName\": \"Gestión de Usuarios\",\n  \"description\": \"Módulo actualizado para gestión de usuarios\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/module/update/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["module", "update", "{{moduleId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Module",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/module/delete/{{moduleId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["module", "delete", "{{moduleId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔐 Permissions",
+      "item": [
+        {
+          "name": "Create Permission",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('permissionId', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissionName\": \"crear_usuario\",\n  \"description\": \"Crear nuevos usuarios\",\n  \"moduleId\": \"{{moduleId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permission/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["permission", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permission/get-all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["permission", "get-all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "moduleId",
+                  "value": "{{moduleId}}",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Permission by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permission/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permission", "{{permissionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Permission",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissionName\": \"crear_usuario_actualizado\",\n  \"description\": \"Permiso actualizado para crear usuarios\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permission/update/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permission", "update", "{{permissionId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Permission",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permission/delete/{{permissionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["permission", "delete", "{{permissionId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 Users",
+      "item": [
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', response.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"email\": \"admin@example.com\",\n  \"firstName\": \"Administrator\",\n  \"lastName\": \"System\",\n  \"password\": \"admin123\",\n  \"roleId\": \"{{roleId}}\",\n  \"profilePhoto\": \"https://example.com/admin.jpg\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "create"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/get-all?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "get-all"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "roleId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "isActive",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Super Administrator\",\n  \"lastName\": \"Updated\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/update/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "update", "{{userId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/delete/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "delete", "{{userId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "AUTH.LOGIN.SUCCESS": {
+    "es": "Inicio de sesión correcto",
+    "en": "Login successful"
+  },
+  "AUTH.REFRESH.SUCCESS": {
+    "es": "Token refrescado",
+    "en": "Token refreshed"
+  },
+  "AUTH.LOGOUT.SUCCESS": {
+    "es": "Sesión cerrada correctamente",
+    "en": "Logout successful"
+  },
+  "AUTH.GET_ME.SUCCESS": {
+    "es": "Usuario autenticado obtenido correctamente",
+    "en": "Authenticated user fetched successfully"
+  },
+  
+  "USER.CREATED": {
+    "es": "Usuario creado con éxito",
+    "en": "User created successfully"
+  },
+  "USER.UPDATED": {
+    "es": "Usuario actualizado",
+    "en": "User updated"
+  },
+  "USER.DELETED": {
+    "es": "Usuario eliminado",
+    "en": "User deleted"
+  },
+  "USER.FOUND": {
+    "es": "Usuarios obtenidos correctamente",
+    "en": "Users fetched successfully"
+  },
+  "USER.FETCHED": {
+    "es": "Usuario obtenido correctamente",
+    "en": "User fetched successfully"
+  },
+
+  "ROLE.CREATED": {
+    "es": "Rol creado con éxito",
+    "en": "Role created successfully"
+  },
+  "ROLE.UPDATED": {
+    "es": "Rol actualizado",
+    "en": "Role updated"
+  },
+  "ROLE.DELETED": {
+    "es": "Rol eliminado",
+    "en": "Role deleted"
+  },
+  "ROLE.FOUND": {
+    "es": "Roles obtenidos correctamente",
+    "en": "Roles fetched successfully"
+  },
+  "ROLE.FETCHED": {
+    "es": "Rol obtenido correctamente",
+    "en": "Role fetched successfully"
+  },
+
+  "MODULE.CREATED": {
+    "es": "Módulo creado con éxito",
+    "en": "Module created successfully"
+  },
+  "MODULE.UPDATED": {
+    "es": "Módulo actualizado",
+    "en": "Module updated"
+  },
+  "MODULE.DELETED": {
+    "es": "Módulo eliminado",
+    "en": "Module deleted"
+  },
+  "MODULE.FOUND": {
+    "es": "Módulos obtenidos correctamente",
+    "en": "Modules fetched successfully"
+  },
+  "MODULE.FETCHED": {
+    "es": "Módulo obtenido correctamente",
+    "en": "Module fetched successfully"
+  },
+
+  "PERMISSION.CREATED": {
+    "es": "Permiso creado con éxito",
+    "en": "Permission created successfully"
+  },
+  "PERMISSION.UPDATED": {
+    "es": "Permiso actualizado",
+    "en": "Permission updated"
+  },
+  "PERMISSION.DELETED": {
+    "es": "Permiso eliminado",
+    "en": "Permission deleted"
+  },
+  "PERMISSION.FOUND": {
+    "es": "Permisos obtenidos correctamente",
+    "en": "Permissions fetched successfully"
+  },
+  "PERMISSION.FETCHED": {
+    "es": "Permiso obtenido correctamente",
+    "en": "Permission fetched successfully"
+  },
+
+  "ERROR.VALIDATION": {
+    "es": "Error de validación",
+    "en": "Validation error"
+  },
+  "ERROR.NOT_FOUND": {
+    "es": "Recurso no encontrado",
+    "en": "Resource not found"
+  },
+  "ERROR.UNAUTHORIZED": {
+    "es": "No autorizado",
+    "en": "Unauthorized"
+  },
+  "ERROR.FORBIDDEN": {
+    "es": "Acceso denegado",
+    "en": "Forbidden"
+  },
+  "ERROR.INTERNAL": {
+    "es": "Error interno del servidor",
+    "en": "Internal server error"
+  },
+  "ERROR.INVALID_CREDENTIALS": {
+    "es": "Credenciales inválidas",
+    "en": "Invalid credentials"
+  },
+  "ERROR.TOKEN_EXPIRED": {
+    "es": "Token expirado",
+    "en": "Token expired"
+  },
+  "ERROR.INVALID_TOKEN": {
+    "es": "Token inválido",
+    "en": "Invalid token"
+  }
+}
