@@ -17,7 +17,7 @@ import { UpdateModuleDto } from './dtos/update-module.dto';
 import { QueryModuleDto } from './dtos/query-module.dto';
 
 @Controller('module')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class ModulesController {
   constructor(private readonly modulesService: ModulesService) {}
 

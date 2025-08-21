@@ -35,6 +35,21 @@ export class User {
   @Column({ name: 'profile_photo', nullable: true })
   profilePhoto: string;
 
+  @Column({ name: 'address', nullable: true })
+  address: string;
+
+  @Column({ name: 'document_number', unique: true, nullable: true })
+  documentNumber: string;
+
+  @Column({ name: 'date_of_birth', nullable: true })
+  dateOfBirth: Date;
+
+  @Column({ name: 'home_phone', nullable: true })
+  homePhone: string;
+
+  @Column({ name: 'mobile_phone', nullable: true })
+  mobilePhone: string;
+
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 

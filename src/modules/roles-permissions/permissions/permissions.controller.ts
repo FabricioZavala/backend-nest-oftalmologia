@@ -17,7 +17,7 @@ import { UpdatePermissionDto } from './dtos/update-permission.dto';
 import { QueryPermissionDto } from './dtos/query-permission.dto';
 
 @Controller('permission')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 

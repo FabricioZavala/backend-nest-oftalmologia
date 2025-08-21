@@ -50,7 +50,8 @@ import { RoleModule } from './modules/roles-permissions/entities/role-module.ent
           RolePermission,
           RoleModule,
         ],
-        synchronize: false, // Use migrations instead
+        synchronize: true, 
+        dropSchema: false,
         logging: process.env.NODE_ENV === 'development',
       }),
       inject: [ConfigService],

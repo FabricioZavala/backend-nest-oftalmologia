@@ -13,7 +13,7 @@ import { RoleModulesService } from '../services/role-modules.service';
 import { AssignModuleToRoleDto } from '../dtos/assign-module-role.dto';
 
 @Controller('role-modules')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class RoleModulesController {
   constructor(private readonly roleModulesService: RoleModulesService) {}
 

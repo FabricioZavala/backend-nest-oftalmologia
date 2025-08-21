@@ -13,7 +13,7 @@ import { RolePermissionsService } from '../services/role-permissions.service';
 import { AssignPermissionToRoleDto } from '../dtos/assign-permission-role.dto';
 
 @Controller('role-permissions')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class RolePermissionsController {
   constructor(
     private readonly rolePermissionsService: RolePermissionsService

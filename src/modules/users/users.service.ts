@@ -23,7 +23,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { username, email, password, ...userData } = createUserDto;
+    const { username, email, password, adress, document_number, home_phone, mobile_phone, ...userData } = createUserDto;
 
     // Check if username or email already exists
     const existingUser = await this.userRepository.findOne({
@@ -49,13 +49,20 @@ export class UsersService {
     const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Create user
-    const user = this.userRepository.create({
+    // Map snake_case to camelCase and prepare user data
+    const userDataMapped = {
       username,
       email,
       passwordHash,
+      address: adress || userData.address,
+      documentNumber: document_number || userData.documentNumber,
+      homePhone: home_phone || userData.homePhone,
+      mobilePhone: mobile_phone || userData.mobilePhone,
       ...userData,
-    });
+    };
+
+    // Create user
+    const user = this.userRepository.create(userDataMapped);
 
     const savedUser = await this.userRepository.save(user);
 
@@ -82,6 +89,11 @@ export class UsersService {
         'user.firstName',
         'user.lastName',
         'user.profilePhoto',
+        'user.address',
+        'user.documentNumber',
+        'user.dateOfBirth',
+        'user.homePhone',
+        'user.mobilePhone',
         'user.isActive',
         'user.isLocked',
         'user.lastLoginAt',
@@ -140,6 +152,11 @@ export class UsersService {
         firstName: true,
         lastName: true,
         profilePhoto: true,
+        address: true,
+        documentNumber: true,
+        dateOfBirth: true,
+        homePhone: true,
+        mobilePhone: true,
         isActive: true,
         isLocked: true,
         failedLoginAttempts: true,
