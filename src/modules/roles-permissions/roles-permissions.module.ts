@@ -16,6 +16,16 @@ import { ModulesController } from './modules/modules.controller';
 import { PermissionsService } from './permissions/permissions.service';
 import { PermissionsController } from './permissions/permissions.controller';
 
+// New services and controllers for role assignments
+import { RolePermissionsService } from './services/role-permissions.service';
+import { RolePermissionsController } from './controllers/role-permissions.controller';
+import { RoleModulesService } from './services/role-modules.service';
+import { RoleModulesController } from './controllers/role-modules.controller';
+import { UserPermissionsService } from './services/user-permissions.service';
+
+// Import User entity for UserPermissionsService
+import { User } from '../users/entities/user.entity';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -24,10 +34,32 @@ import { PermissionsController } from './permissions/permissions.controller';
       Permission,
       RolePermission,
       RoleModule,
+      User,
     ]),
   ],
-  controllers: [RolesController, ModulesController, PermissionsController],
-  providers: [RolesService, ModulesService, PermissionsService],
-  exports: [TypeOrmModule, RolesService, ModulesService, PermissionsService],
+  controllers: [
+    RolesController,
+    ModulesController,
+    PermissionsController,
+    RolePermissionsController,
+    RoleModulesController,
+  ],
+  providers: [
+    RolesService,
+    ModulesService,
+    PermissionsService,
+    RolePermissionsService,
+    RoleModulesService,
+    UserPermissionsService,
+  ],
+  exports: [
+    TypeOrmModule,
+    RolesService,
+    ModulesService,
+    PermissionsService,
+    RolePermissionsService,
+    RoleModulesService,
+    UserPermissionsService,
+  ],
 })
 export class RolesPermissionsModule {}

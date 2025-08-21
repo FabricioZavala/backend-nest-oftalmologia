@@ -9,6 +9,7 @@ import { validate } from './config/env.validation';
 // Common
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { CommonModule } from './common/common.module';
 
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -56,6 +57,7 @@ import { RoleModule } from './modules/roles-permissions/entities/role-module.ent
     }),
 
     // Feature modules
+    CommonModule,
     AuthModule,
     UsersModule,
     RolesPermissionsModule,
