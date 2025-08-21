@@ -17,7 +17,7 @@ import { UpdateRoleDto } from './dtos/update-role.dto';
 import { QueryRoleDto } from './dtos/query-role.dto';
 
 @Controller('roles')
-// @UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'))
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
