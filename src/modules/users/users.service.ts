@@ -183,8 +183,11 @@ export class UsersService {
     // Get total count
     const totalCount = await queryBuilder.getCount();
 
-    // Apply pagination and get results
-    const users = await queryBuilder.skip(skip).take(take).getMany();
+    const users = await queryBuilder
+      .orderBy('user.createdAt', 'DESC')
+      .skip(skip)
+      .take(take)
+      .getMany();
 
     const paginatedResult = PaginationUtil.paginate(users, totalCount, {
       page,
