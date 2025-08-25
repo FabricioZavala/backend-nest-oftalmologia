@@ -85,7 +85,6 @@ export class UsersService {
   }
 
   async findAll(queryDto: QueryUserDto) {
-    console.log('🔥 Backend - findAll called with:', queryDto);
     const {
       page,
       limit,
@@ -100,20 +99,6 @@ export class UsersService {
       isActive,
       isLocked,
     } = queryDto;
-    console.log('🔥 Backend - Extracted params:', {
-      page,
-      limit,
-      search,
-      firstName,
-      lastName,
-      email,
-      documentNumber,
-      mobilePhone,
-      address,
-      roleId,
-      isActive,
-      isLocked,
-    });
 
     const { skip, take } = PaginationUtil.getSkipAndTake({ page, limit });
 
@@ -142,7 +127,6 @@ export class UsersService {
         'role.description',
       ]);
 
-    // Apply filters
     if (search) {
       queryBuilder.andWhere(
         '(user.username ILIKE :search OR user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.documentNumber ILIKE :search)',
@@ -214,7 +198,6 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    console.log('🔥 Backend - findOne called with ID:', id);
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['role'],
