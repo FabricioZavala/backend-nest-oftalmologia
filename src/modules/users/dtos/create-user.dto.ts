@@ -5,6 +5,7 @@ import {
   IsOptional,
   MinLength,
   IsDateString,
+  IsISO8601,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 
@@ -31,27 +32,32 @@ export class CreateUserDto {
   @IsUUID()
   roleId: string;
 
+  @IsString()
+  @MinLength(1)
+  documentNumber: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  document_number?: string;
+
+  @IsISO8601({ strict: true })
+  dateOfBirth: string;
+
+  @IsString()
+  mobilePhone: string;
+
+  @IsOptional()
+  @IsString()
+  mobile_phone?: string;
+
   @IsOptional()
   @IsString()
   address?: string;
 
   @IsOptional()
   @IsString()
-  adress?: string; // Alias para address
-
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  documentNumber?: string;
-
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  document_number?: string; // Alias para documentNumber
-
-  @IsOptional()
-  @IsDateString()
-  dateOfBirth?: Date;
+  adress?: string;
 
   @IsOptional()
   @IsString()
@@ -59,15 +65,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  home_phone?: string; // Alias para homePhone
-
-  @IsOptional()
-  @IsString()
-  mobilePhone?: string;
-
-  @IsOptional()
-  @IsString()
-  mobile_phone?: string; // Alias para mobilePhone
+  home_phone?: string;
 
   @IsOptional()
   @IsString()

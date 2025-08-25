@@ -23,7 +23,16 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { username, email, password, adress, document_number, home_phone, mobile_phone, ...userData } = createUserDto;
+    const {
+      username,
+      email,
+      password,
+      adress,
+      document_number,
+      home_phone,
+      mobile_phone,
+      ...userData
+    } = createUserDto;
 
     // Check if username or email already exists
     const existingUser = await this.userRepository.findOne({
@@ -76,7 +85,36 @@ export class UsersService {
   }
 
   async findAll(queryDto: QueryUserDto) {
-    const { page, limit, search, roleId, isActive, isLocked } = queryDto;
+    console.log('🔥 Backend - findAll called with:', queryDto);
+    const {
+      page,
+      limit,
+      search,
+      firstName,
+      lastName,
+      email,
+      documentNumber,
+      mobilePhone,
+      address,
+      roleId,
+      isActive,
+      isLocked,
+    } = queryDto;
+    console.log('🔥 Backend - Extracted params:', {
+      page,
+      limit,
+      search,
+      firstName,
+      lastName,
+      email,
+      documentNumber,
+      mobilePhone,
+      address,
+      roleId,
+      isActive,
+      isLocked,
+    });
+
     const { skip, take } = PaginationUtil.getSkipAndTake({ page, limit });
 
     const queryBuilder = this.userRepository
@@ -107,9 +145,43 @@ export class UsersService {
     // Apply filters
     if (search) {
       queryBuilder.andWhere(
-        '(user.username ILIKE :search OR user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search)',
+        '(user.username ILIKE :search OR user.email ILIKE :search OR user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.documentNumber ILIKE :search)',
         { search: `%${search}%` }
       );
+    }
+
+    if (firstName) {
+      queryBuilder.andWhere('user.firstName ILIKE :firstName', {
+        firstName: `%${firstName}%`,
+      });
+    }
+
+    if (lastName) {
+      queryBuilder.andWhere('user.lastName ILIKE :lastName', {
+        lastName: `%${lastName}%`,
+      });
+    }
+
+    if (email) {
+      queryBuilder.andWhere('user.email ILIKE :email', { email: `%${email}%` });
+    }
+
+    if (documentNumber) {
+      queryBuilder.andWhere('user.documentNumber ILIKE :documentNumber', {
+        documentNumber: `%${documentNumber}%`,
+      });
+    }
+
+    if (mobilePhone) {
+      queryBuilder.andWhere('user.mobilePhone ILIKE :mobilePhone', {
+        mobilePhone: `%${mobilePhone}%`,
+      });
+    }
+
+    if (address) {
+      queryBuilder.andWhere('user.address ILIKE :address', {
+        address: `%${address}%`,
+      });
     }
 
     if (roleId) {
@@ -142,6 +214,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
+    console.log('🔥 Backend - findOne called with ID:', id);
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['role'],

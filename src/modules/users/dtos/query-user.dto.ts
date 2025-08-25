@@ -4,6 +4,7 @@ import {
   IsString,
   IsBoolean,
   IsUUID,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -21,6 +22,30 @@ export class QueryUserDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  documentNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  mobilePhone?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
 
   @IsOptional()
   @IsUUID()
