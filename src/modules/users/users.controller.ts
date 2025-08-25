@@ -27,7 +27,7 @@ export class UsersController {
   }
 
   @Get('get-all')
-  async findAll(@Query(ValidationPipe) queryDto: QueryUserDto) {
+  async findAll(@Query() queryDto: QueryUserDto) {
     return this.usersService.findAll(queryDto);
   }
 

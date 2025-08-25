@@ -6,17 +6,23 @@ import {
   IsUUID,
   IsEmail,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 export class QueryUserDto {
   @IsOptional()
+  @Transform(({ value }) => {
+    const num = Number(value);
+    return isNaN(num) ? 1 : num;
+  })
   @IsNumber()
-  @Type(() => Number)
   page?: number = 1;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    const num = Number(value);
+    return isNaN(num) ? 10 : num;
+  })
   @IsNumber()
-  @Type(() => Number)
   limit?: number = 10;
 
   @IsOptional()
@@ -52,12 +58,24 @@ export class QueryUserDto {
   roleId?: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    if (value === '1') return true;
+    if (value === '0') return false;
+    return undefined;
+  })
   @IsBoolean()
-  @Type(() => Boolean)
   isActive?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    if (value === '1') return true;
+    if (value === '0') return false;
+    return undefined;
+  })
   @IsBoolean()
-  @Type(() => Boolean)
   isLocked?: boolean;
 }

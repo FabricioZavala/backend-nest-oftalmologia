@@ -22,19 +22,17 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
       transformOptions: {
-        enableImplicitConversion: true,
+        enableImplicitConversion: false,
       },
     })
   );
 
-  // Get port from environment
   const port = configService.get<number>('PORT') || 3000;
 
   await app.listen(port);
