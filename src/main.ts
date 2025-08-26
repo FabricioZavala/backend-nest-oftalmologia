@@ -38,10 +38,7 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(
-    `🚀 Application is running on: http://localhost:${port}/${apiPrefix}`
-  );
-  console.log(
-    `📚 API Documentation: http://localhost:${port}/${apiPrefix}/docs (if implemented)`
+    `Application is running on: http://localhost:${port}/${apiPrefix}`
   );
 }
 

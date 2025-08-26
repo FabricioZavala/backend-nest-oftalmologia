@@ -4,7 +4,6 @@ import {
   IsString,
   IsBoolean,
   IsUUID,
-  IsEmail,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
@@ -38,7 +37,7 @@ export class QueryUserDto {
   lastName?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsString()
   email?: string;
 
   @IsOptional()
