@@ -114,9 +114,62 @@ export class RolePermissionsService {
 
     return {
       messageKey: 'ROLE_PERMISSION.FOUND',
+      data: rolePermissions.map(rp => ({
+        id: rp.permission.id,
+        permissionName: rp.permission.permissionName,
+        description: rp.permission.description,
+        isActive: rp.permission.isActive,
+        moduleId: rp.permission.moduleId,
+        module: rp.permission.module,
+        isEnabled: rp.isEnabled,
+        isActiveForRole: rp.isEnabled,
+      })),
+    };
+  }
+
+  async getRolePermissionsByModule(roleId: string, moduleId?: string) {
+    const role = await this.roleRepository.findOne({ where: { id: roleId } });
+    if (!role) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Role not found',
+      });
+    }
+
+    let queryBuilder = this.permissionRepository
+      .createQueryBuilder('permission')
+      .leftJoinAndSelect('permission.module', 'module')
+      .leftJoin('permission.rolePermissions', 'rp', 'rp.roleId = :roleId AND rp.permissionId = permission.id', { roleId })
+      .where('permission.isActive = :isActive', { isActive: true })
+      .addSelect(['rp.isEnabled', 'rp.roleId', 'rp.permissionId']);
+
+    if (moduleId) {
+      queryBuilder = queryBuilder.andWhere('permission.moduleId = :moduleId', { moduleId });
+    }
+
+    const permissions = await queryBuilder.getMany();
+
+    return {
+      messageKey: 'ROLE_PERMISSION.FOUND',
       data: {
-        role,
-        permissions: rolePermissions,
+        result: permissions.map(permission => {
+          const rolePermission = permission.rolePermissions?.find(rp => 
+            rp.roleId === roleId && rp.permissionId === permission.id
+          );
+          
+          return {
+            id: permission.id,
+            permissionName: permission.permissionName,
+            description: permission.description,
+            isActive: permission.isActive,
+            moduleId: permission.moduleId,
+            module: permission.module,
+ 
+            isActiveForRole: rolePermission?.isEnabled || false,
+            isEnabled: rolePermission?.isEnabled || false,
+          };
+        }),
+        totalCount: permissions.length,
       },
     };
   }

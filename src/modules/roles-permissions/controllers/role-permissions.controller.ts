@@ -37,6 +37,14 @@ export class RolePermissionsController {
   async getRolePermissions(@Param('roleId') roleId: string) {
     return this.rolePermissionsService.getRolePermissions(roleId);
   }
+
+  @Get('role/:roleId/module/:moduleId')
+  async getRolePermissionsByModule(
+    @Param('roleId') roleId: string,
+    @Param('moduleId') moduleId: string
+  ) {
+    return this.rolePermissionsService.getRolePermissionsByModule(roleId, moduleId);
+  }
   @Get('all')
   async getAllRolePermissions() {
     return this.rolePermissionsService.getAllRolePermissions();
