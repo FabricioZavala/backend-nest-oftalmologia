@@ -339,4 +339,13 @@ export class UsersService {
       data: { id },
     };
   }
+
+  async findByRole(roleName: string): Promise<User[]> {
+    return this.userRepository.find({
+      where: {
+        role: { roleName },
+      },
+      relations: ['role'],
+    });
+  }
 }

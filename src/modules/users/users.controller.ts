@@ -15,27 +15,22 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
-
 @Controller('user')
-// @UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'))
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
   @Post('create')
   async create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
-
   @Get('get-all')
   async findAll(@Query() queryDto: QueryUserDto) {
     return this.usersService.findAll(queryDto);
   }
-
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
-
   @Patch('update/:id')
   async update(
     @Param('id') id: string,
@@ -43,7 +38,6 @@ export class UsersController {
   ) {
     return this.usersService.update(id, updateUserDto);
   }
-
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);

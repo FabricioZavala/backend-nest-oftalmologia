@@ -161,4 +161,10 @@ export class RolesService {
       data: { id },
     };
   }
+
+  async findByName(roleName: string): Promise<Role | null> {
+    return this.roleRepository.findOne({
+      where: { roleName },
+    });
+  }
 }

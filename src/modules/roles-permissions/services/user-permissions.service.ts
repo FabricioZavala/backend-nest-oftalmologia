@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
@@ -7,6 +7,8 @@ import { RoleModule } from '../entities/role-module.entity';
 
 @Injectable()
 export class UserPermissionsService {
+  private readonly logger = new Logger(UserPermissionsService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -17,12 +19,15 @@ export class UserPermissionsService {
   ) {}
 
   async getUserPermissions(userId: string) {
+    this.logger.log(`Getting permissions for user: ${userId}`);
+
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['role'],
     });
 
     if (!user || !user.role) {
+      this.logger.warn(`User ${userId} not found or has no role`);
       return {
         messageKey: 'USER.PROFILE_FETCHED',
         data: {

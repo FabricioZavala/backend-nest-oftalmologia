@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +15,8 @@ import { RefreshDto } from './dto/refresh.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -24,6 +27,8 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { identifier, password } = loginDto;
 
+    this.logger.log(`Login attempt for identifier: ${identifier}`);
+
     // Find user by username or email
     const user = await this.userRepository.findOne({
       where: [{ username: identifier }, { email: identifier }],
@@ -31,19 +36,28 @@ export class AuthService {
     });
 
     if (!user) {
+      this.logger.warn(`User not found for identifier: ${identifier}`);
       throw new UnauthorizedException({
         messageKey: 'ERROR.INVALID_CREDENTIALS',
       });
     }
 
+    this.logger.log(
+      `User found: ${user.username} (${user.email}) - Role: ${
+        user.role?.roleName || 'No role'
+      }`
+    );
+
     // Check if user is active and not locked
     if (!user.isActive) {
+      this.logger.warn(`Inactive user login attempt: ${identifier}`);
       throw new UnauthorizedException({
         messageKey: 'ERROR.UNAUTHORIZED',
       });
     }
 
     if (user.isLocked) {
+      this.logger.warn(`Locked user login attempt: ${identifier}`);
       throw new UnauthorizedException({
         messageKey: 'ERROR.UNAUTHORIZED',
       });
@@ -52,6 +66,7 @@ export class AuthService {
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
+      this.logger.warn(`Invalid password for user: ${identifier}`);
       // Increment failed login attempts
       await this.userRepository.update(user.id, {
         failedLoginAttempts: user.failedLoginAttempts + 1,
@@ -59,6 +74,7 @@ export class AuthService {
 
       // Lock user after 5 failed attempts
       if (user.failedLoginAttempts >= 4) {
+        this.logger.warn(`User locked due to failed attempts: ${identifier}`);
         await this.userRepository.update(user.id, {
           isLocked: true,
         });
@@ -138,7 +154,11 @@ export class AuthService {
   async getMeUser(userId: string) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['role'],
+      relations: [
+        'role',
+        'role.rolePermissions',
+        'role.rolePermissions.permission',
+      ],
     });
 
     if (!user) {
@@ -146,6 +166,12 @@ export class AuthService {
         messageKey: 'ERROR.UNAUTHORIZED',
       });
     }
+
+    // Extraer los IDs de permisos activos
+    const permissionIds =
+      user.role?.rolePermissions
+        ?.filter((rp) => rp.isEnabled && rp.permission.isActive)
+        ?.map((rp) => rp.permission.id) || [];
 
     return {
       messageKey: 'AUTH.GET_ME.SUCCESS',
@@ -165,6 +191,7 @@ export class AuthService {
         isActive: user.isActive,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
+        permissionIds: permissionIds, // ⭐ Nuevo campo con IDs de permisos
       },
     };
   }
