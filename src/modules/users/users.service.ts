@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
@@ -11,15 +12,18 @@ import { ConfigService } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateCurrentUserDto } from './dtos/update-current-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { PaginationUtil } from '../../common/utils/pagination.util';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private filesService: FilesService
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -34,7 +38,6 @@ export class UsersService {
       ...userData
     } = createUserDto;
 
-    // Check if username or email already exists
     const existingUser = await this.userRepository.findOne({
       where: [{ username }, { email }],
     });
@@ -54,11 +57,9 @@ export class UsersService {
       }
     }
 
-    // Hash password
     const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    // Map snake_case to camelCase and prepare user data
     const userDataMapped = {
       username,
       email,
@@ -70,12 +71,10 @@ export class UsersService {
       ...userData,
     };
 
-    // Create user
     const user = this.userRepository.create(userDataMapped);
 
     const savedUser = await this.userRepository.save(user);
 
-    // Return user without password
     const { passwordHash: _, ...userWithoutPassword } = savedUser;
 
     return {
@@ -180,7 +179,6 @@ export class UsersService {
       queryBuilder.andWhere('user.isLocked = :isLocked', { isLocked });
     }
 
-    // Get total count
     const totalCount = await queryBuilder.getCount();
 
     const users = await queryBuilder
@@ -253,7 +251,6 @@ export class UsersService {
 
     const { password, username, email, ...updateData } = updateUserDto;
 
-    // Check for username/email conflicts if they're being updated
     if (username && username !== user.username) {
       const existingUser = await this.userRepository.findOne({
         where: { username },
@@ -278,14 +275,12 @@ export class UsersService {
       }
     }
 
-    // Hash new password if provided
     let passwordHash = user.passwordHash;
     if (password) {
       const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
       passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
-    // Update user
     await this.userRepository.update(id, {
       username,
       email,
@@ -293,7 +288,6 @@ export class UsersService {
       ...updateData,
     });
 
-    // Get updated user
     const updatedUser = await this.userRepository.findOne({
       where: { id },
       relations: ['role'],
@@ -347,5 +341,122 @@ export class UsersService {
       },
       relations: ['role'],
     });
+  }
+
+  async updateCurrent(
+    userId: string,
+    updateCurrentUserDto: UpdateCurrentUserDto,
+    profilePhoto?: Express.Multer.File
+  ): Promise<any> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      if (!user) {
+        throw new NotFoundException({
+          messageKey: 'ERROR.NOT_FOUND',
+          message: 'User not found',
+        });
+      }
+
+      const { currentPassword, newPassword, email, ...updateData } =
+        updateCurrentUserDto;
+
+      if (email && email !== user.email) {
+        const existingUser = await this.userRepository.findOne({
+          where: { email },
+        });
+        if (existingUser) {
+          throw new ConflictException({
+            messageKey: 'ERROR.VALIDATION',
+            message: 'Email already exists',
+          });
+        }
+      }
+
+      let passwordHash = user.passwordHash;
+      if (currentPassword && newPassword) {
+        const isCurrentPasswordValid = await bcrypt.compare(
+          currentPassword,
+          user.passwordHash
+        );
+        if (!isCurrentPasswordValid) {
+          throw new UnauthorizedException({
+            messageKey: 'ERROR.INVALID_CURRENT_PASSWORD',
+            message: 'Current password is incorrect',
+          });
+        }
+
+        const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
+        passwordHash = await bcrypt.hash(newPassword, saltRounds);
+      } else if (currentPassword || newPassword) {
+        throw new BadRequestException({
+          messageKey: 'ERROR.BOTH_PASSWORDS_REQUIRED',
+          message:
+            'Both current password and new password are required for password change',
+        });
+      }
+
+      let profilePhotoPath = user.profilePhoto;
+      if (profilePhoto) {
+        try {
+          const uploadResult = await this.filesService.uploadFile(
+            profilePhoto,
+            {
+              entityType: 'user',
+              entityId: userId,
+              fileCategory: 'profile_photo',
+            }
+          );
+
+          if (uploadResult.data && uploadResult.data.url) {
+            profilePhotoPath = uploadResult.data.url;
+          }
+        } catch (fileError) {
+          throw fileError;
+        }
+      }
+
+      await this.userRepository.update(userId, {
+        email,
+        passwordHash,
+        profilePhoto: profilePhotoPath,
+        ...updateData,
+      });
+
+      const updatedUser = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['role'],
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          profilePhoto: true,
+          address: true,
+          documentNumber: true,
+          dateOfBirth: true,
+          homePhone: true,
+          mobilePhone: true,
+          isActive: true,
+          isLocked: true,
+          lastLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
+          role: {
+            id: true,
+            roleName: true,
+            description: true,
+          },
+        },
+      });
+
+      return {
+        messageKey: 'USER.PROFILE_UPDATED',
+        data: updatedUser,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

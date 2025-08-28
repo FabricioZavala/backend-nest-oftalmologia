@@ -9,12 +9,18 @@ import {
   Query,
   UseGuards,
   ValidationPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { UpdateCurrentUserDto } from './dtos/update-current-user.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { User } from './entities/user.entity';
 @Controller('user')
 @UseGuards(AuthGuard('jwt'))
 export class UsersController {
@@ -31,6 +37,26 @@ export class UsersController {
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
+
+  @Patch('update/current')
+  @UseInterceptors(FileInterceptor('profilePhoto'))
+  async updateCurrent(
+    @CurrentUser() user: User,
+    @Body(ValidationPipe) updateCurrentUserDto: UpdateCurrentUserDto,
+    @UploadedFile() profilePhoto?: Express.Multer.File
+  ) {
+    try {
+      const result = await this.usersService.updateCurrent(
+        user.id,
+        updateCurrentUserDto,
+        profilePhoto
+      );
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   @Patch('update/:id')
   async update(
     @Param('id') id: string,
@@ -38,6 +64,7 @@ export class UsersController {
   ) {
     return this.usersService.update(id, updateUserDto);
   }
+
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);

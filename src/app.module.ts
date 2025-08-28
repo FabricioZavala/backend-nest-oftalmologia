@@ -15,6 +15,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesPermissionsModule } from './modules/roles-permissions/roles-permissions.module';
+import { FilesModule } from './modules/files/files.module';
 
 // Entities
 import { User } from './modules/users/entities/user.entity';
@@ -23,16 +24,15 @@ import { Module as ModuleEntity } from './modules/roles-permissions/entities/mod
 import { Permission } from './modules/roles-permissions/entities/permission.entity';
 import { RolePermission } from './modules/roles-permissions/entities/role-permission.entity';
 import { RoleModule } from './modules/roles-permissions/entities/role-module.entity';
+import { File } from './modules/files/entities/file.entity';
 
 @Module({
   imports: [
-    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       validate,
     }),
 
-    // Database
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -49,8 +49,9 @@ import { RoleModule } from './modules/roles-permissions/entities/role-module.ent
           Permission,
           RolePermission,
           RoleModule,
+          File,
         ],
-        synchronize: true, 
+        synchronize: true,
         dropSchema: false,
         logging: process.env.NODE_ENV === 'development',
       }),
@@ -62,6 +63,7 @@ import { RoleModule } from './modules/roles-permissions/entities/role-module.ent
     AuthModule,
     UsersModule,
     RolesPermissionsModule,
+    FilesModule,
   ],
   providers: [
     {

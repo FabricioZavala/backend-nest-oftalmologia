@@ -1,19 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Get configuration service
   const configService = app.get(ConfigService);
 
-  // Set global prefix
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
+
   const apiPrefix = configService.get<string>('API_PREFIX') || 'v1/api';
   app.setGlobalPrefix(apiPrefix);
 
-  // Enable CORS
   const corsOrigin = configService.get<string>('CORS_ORIGIN') || '*';
   app.enableCors({
     origin: corsOrigin === '*' ? true : corsOrigin.split(','),

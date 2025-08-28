@@ -319,6 +319,24 @@ http://localhost:3000/v1/api
 }
 ```
 
+#### PATCH `/user/update/current`
+
+**Descripción**: Actualizar perfil del usuario actual (incluyendo foto de perfil y cambio de contraseña)
+**Headers**: `Authorization: Bearer <access_token>`
+**Content-Type**: `multipart/form-data`
+
+**Campos del formulario**:
+
+- `firstName` (optional): Nuevo nombre
+- `lastName` (optional): Nuevo apellido
+- `email` (optional): Nuevo email
+- `address` (optional): Nueva dirección
+- `homePhone` (optional): Nuevo teléfono fijo
+- `mobilePhone` (optional): Nuevo teléfono móvil
+- `currentPassword` (optional): Contraseña actual (requerida para cambio de contraseña)
+- `newPassword` (optional): Nueva contraseña (requerida junto con currentPassword)
+- `profilePhoto` (optional): Archivo de imagen para foto de perfil (máx. 8MB, tipos: jpg, png, webp, gif)
+
 #### DELETE `/user/delete/:id`
 
 **Descripción**: Eliminar usuario
@@ -406,7 +424,58 @@ http://localhost:3000/v1/api
 **Descripción**: Eliminar módulo
 **Headers**: `Authorization: Bearer <access_token>`
 
-### 🔐 Permisos (`/permission`)
+### � Archivos (`/files`)
+
+#### POST `/files/upload`
+
+**Descripción**: Subir archivo al sistema
+**Headers**: `Authorization: Bearer <access_token>`
+**Content-Type**: `multipart/form-data`
+
+**Campos del formulario**:
+
+- `file`: Archivo a subir (máx. 8MB)
+- `entityType`: Tipo de entidad ('user', 'patient', etc.)
+- `entityId`: ID de la entidad
+- `fileCategory` (optional): Categoría del archivo ('profile_photo', 'document', etc.)
+
+#### GET `/files`
+
+**Descripción**: Obtener listado de archivos
+**Headers**: `Authorization: Bearer <access_token>`
+**Query Parameters**:
+
+- `entityType` (optional): Filtrar por tipo de entidad
+- `entityId` (optional): Filtrar por ID de entidad
+- `fileCategory` (optional): Filtrar por categoría
+- `isActive` (optional): Filtrar por archivos activos
+- `page` (optional): Número de página
+- `limit` (optional): Elementos por página
+
+#### GET `/files/:id`
+
+**Descripción**: Obtener archivo por ID
+**Headers**: `Authorization: Bearer <access_token>`
+
+#### GET `/files/entity/:entityType/:entityId`
+
+**Descripción**: Obtener archivos de una entidad específica
+**Headers**: `Authorization: Bearer <access_token>`
+**Query Parameters**:
+
+- `fileCategory` (optional): Filtrar por categoría específica
+
+#### DELETE `/files/:id`
+
+**Descripción**: Eliminar archivo (físico y de base de datos)
+**Headers**: `Authorization: Bearer <access_token>`
+
+#### POST `/files/:id/deactivate`
+
+**Descripción**: Desactivar archivo (soft delete)
+**Headers**: `Authorization: Bearer <access_token>`
+
+### �🔐 Permisos (`/permission`)
 
 #### GET `/permission/get-all`
 
