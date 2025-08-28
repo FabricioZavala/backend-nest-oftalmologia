@@ -62,6 +62,12 @@ export class User {
   @Column({ name: 'last_login_at', nullable: true })
   lastLoginAt: Date;
 
+  @Column({ name: 'reset_token', nullable: true })
+  resetToken: string;
+
+  @Column({ name: 'reset_token_expiry', nullable: true })
+  resetTokenExpiry: Date;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

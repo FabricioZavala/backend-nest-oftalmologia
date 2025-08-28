@@ -11,6 +11,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { UserPermissionsService } from '../roles-permissions/services/user-permissions.service';
@@ -52,5 +55,27 @@ export class AuthController {
     );
     this.logger.log(`User ${user.id} permissions loaded successfully`);
     return result;
+  }
+
+  @Post('change-password')
+  @UseGuards(AuthGuard('jwt'))
+  async changePassword(
+    @CurrentUser() user: User,
+    @Body(ValidationPipe) changePasswordDto: ChangePasswordDto
+  ) {
+    this.logger.log(`Password change request for user ID: ${user.id}`);
+    return this.authService.changePassword(user.id, changePasswordDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body(ValidationPipe) forgotPasswordDto: ForgotPasswordDto) {
+    this.logger.log(`Forgot password request for email: ${forgotPasswordDto.email}`);
+    return this.authService.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body(ValidationPipe) resetPasswordDto: ResetPasswordDto) {
+    this.logger.log(`Reset password request with token: ${resetPasswordDto.token}`);
+    return this.authService.resetPassword(resetPasswordDto);
   }
 }
