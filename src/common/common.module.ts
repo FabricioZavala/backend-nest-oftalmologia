@@ -4,11 +4,12 @@ import { RolePermission } from '../modules/roles-permissions/entities/role-permi
 import { Permission } from '../modules/roles-permissions/entities/permission.entity';
 import { RolesGuard } from './guards/roles.guard';
 import { PermissionsGuard } from './guards/permissions.guard';
+import { EmailUtil } from './utils/email.util';
 
 @Global()
 @Module({
   imports: [TypeOrmModule.forFeature([RolePermission, Permission])],
-  providers: [RolesGuard, PermissionsGuard],
-  exports: [RolesGuard, PermissionsGuard],
+  providers: [RolesGuard, PermissionsGuard, EmailUtil],
+  exports: [RolesGuard, PermissionsGuard, EmailUtil],
 })
 export class CommonModule {}

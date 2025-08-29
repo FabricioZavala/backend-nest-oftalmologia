@@ -11,13 +11,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import * as nodemailer from 'nodemailer';
 import { User } from '../users/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { EmailUtil } from '../../common/utils/email.util';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +27,8 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private emailUtil: EmailUtil
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -35,7 +36,6 @@ export class AuthService {
 
     this.logger.log(`Login attempt for identifier: ${identifier}`);
 
-    // Find user by username or email
     const user = await this.userRepository.findOne({
       where: [{ username: identifier }, { email: identifier }],
       relations: ['role'],
@@ -54,7 +54,6 @@ export class AuthService {
       }`
     );
 
-    // Check if user is active and not locked
     if (!user.isActive) {
       this.logger.warn(`Inactive user login attempt: ${identifier}`);
       throw new UnauthorizedException({
@@ -69,16 +68,13 @@ export class AuthService {
       });
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       this.logger.warn(`Invalid password for user: ${identifier}`);
-      // Increment failed login attempts
       await this.userRepository.update(user.id, {
         failedLoginAttempts: user.failedLoginAttempts + 1,
       });
 
-      // Lock user after 5 failed attempts
       if (user.failedLoginAttempts >= 4) {
         this.logger.warn(`User locked due to failed attempts: ${identifier}`);
         await this.userRepository.update(user.id, {
@@ -91,13 +87,11 @@ export class AuthService {
       });
     }
 
-    // Reset failed login attempts and update last login
     await this.userRepository.update(user.id, {
       failedLoginAttempts: 0,
       lastLoginAt: new Date(),
     });
 
-    // Generate tokens
     const tokens = await this.generateTokens(user);
 
     return {
@@ -126,12 +120,10 @@ export class AuthService {
     const { refreshToken } = refreshDto;
 
     try {
-      // Verify refresh token
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
 
-      // Find user
       const user = await this.userRepository.findOne({
         where: { id: payload.sub },
         relations: ['role'],
@@ -143,7 +135,6 @@ export class AuthService {
         });
       }
 
-      // Generate new tokens
       const tokens = await this.generateTokens(user);
 
       return {
@@ -173,7 +164,6 @@ export class AuthService {
       });
     }
 
-    // Extraer los IDs de permisos activos
     const permissionIds =
       user.role?.rolePermissions
         ?.filter((rp) => rp.isEnabled && rp.permission.isActive)
@@ -197,7 +187,7 @@ export class AuthService {
         isActive: user.isActive,
         lastLoginAt: user.lastLoginAt,
         createdAt: user.createdAt,
-        permissionIds: permissionIds, // ⭐ Nuevo campo con IDs de permisos
+        permissionIds: permissionIds,
       },
     };
   }
@@ -248,7 +238,6 @@ export class AuthService {
       });
     }
 
-    // Verificar contraseña actual
     const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
       user.passwordHash
@@ -261,11 +250,9 @@ export class AuthService {
       });
     }
 
-    // Encriptar nueva contraseña
     const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
     const passwordHash = await bcrypt.hash(newPassword, saltRounds);
 
-    // Actualizar contraseña
     await this.userRepository.update(userId, {
       passwordHash,
     });
@@ -284,25 +271,25 @@ export class AuthService {
     });
 
     if (!user) {
-      // Por seguridad, siempre devolvemos el mismo mensaje
       return {
         messageKey: 'AUTH.RESET_EMAIL_SENT',
-        message: 'If the email exists in our system, a reset link has been sent',
+        message:
+          'If the email exists in our system, a reset link has been sent',
       };
     }
 
-    // Generar token de reset
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hora
-
-    // Guardar token en el usuario
+    const resetTokenExpiry = new Date(Date.now() + 3600000);
     await this.userRepository.update(user.id, {
       resetToken,
       resetTokenExpiry,
     });
 
-    // Enviar email (simplificado para demostración)
-    await this.sendResetEmail(user.email, resetToken);
+    try {
+      await this.emailUtil.sendResetPasswordEmail(user.email, resetToken);
+    } catch (error) {
+      this.logger.error('Failed to send reset email', error.message);
+    }
 
     return {
       messageKey: 'AUTH.RESET_EMAIL_SENT',
@@ -314,7 +301,7 @@ export class AuthService {
     const { token, newPassword } = resetPasswordDto;
 
     const user = await this.userRepository.findOne({
-      where: { 
+      where: {
         resetToken: token,
       },
     });
@@ -326,11 +313,9 @@ export class AuthService {
       });
     }
 
-    // Encriptar nueva contraseña
     const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS');
     const passwordHash = await bcrypt.hash(newPassword, saltRounds);
 
-    // Actualizar contraseña y limpiar token
     await this.userRepository.update(user.id, {
       passwordHash,
       resetToken: null,
@@ -341,62 +326,5 @@ export class AuthService {
       messageKey: 'AUTH.PASSWORD_RESET',
       message: 'Password has been reset successfully',
     };
-  }
-
-  private async sendResetEmail(email: string, token: string) {
-    try {
-      const resetUrl = `${this.configService.get('FRONTEND_URL') || 'http://localhost:4200'}/auth/reset-password?token=${token}`;
-      
-      // Configurar el transporter de nodemailer
-      const transporter = nodemailer.createTransport({
-        host: this.configService.get('MAIL_HOST') || 'smtp.gmail.com',
-        port: parseInt(this.configService.get('MAIL_PORT')) || 587,
-        secure: this.configService.get('MAIL_SECURE') === 'true' || false,
-        auth: {
-          user: this.configService.get('MAIL_USER'),
-          pass: this.configService.get('MAIL_PASS'),
-        },
-      });
-
-      // Si no hay configuración de correo, solo logear la URL
-      if (!this.configService.get('MAIL_USER') || !this.configService.get('MAIL_PASS')) {
-        this.logger.log(`🔗 Reset password URL for ${email}: ${resetUrl}`);
-        this.logger.warn('⚠️  Email configuration not found. Add MAIL_USER and MAIL_PASS to environment variables to send actual emails.');
-        return;
-      }
-
-      // Enviar el correo
-      const mailOptions = {
-        from: this.configService.get('MAIL_USER'),
-        to: email,
-        subject: 'Restablecer contraseña - Sistema Oftalmología',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #2563eb;">Restablecer contraseña</h2>
-            <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva contraseña:</p>
-            <div style="margin: 30px 0;">
-              <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                Restablecer contraseña
-              </a>
-            </div>
-            <p style="color: #6b7280; font-size: 14px;">
-              Este enlace expirará en 1 hora por razones de seguridad.
-            </p>
-            <p style="color: #6b7280; font-size: 14px;">
-              Si no solicitaste restablecer tu contraseña, puedes ignorar este correo.
-            </p>
-          </div>
-        `,
-      };
-
-      await transporter.sendMail(mailOptions);
-      this.logger.log(`✅ Reset email sent successfully to ${email}`);
-      
-    } catch (error) {
-      this.logger.error(`❌ Failed to send reset email to ${email}:`, error);
-      // Log the reset URL as fallback
-      const resetUrl = `${this.configService.get('FRONTEND_URL') || 'http://localhost:4200'}/auth/reset-password?token=${token}`;
-      this.logger.log(`🔗 Fallback reset URL for ${email}: ${resetUrl}`);
-    }
   }
 }
