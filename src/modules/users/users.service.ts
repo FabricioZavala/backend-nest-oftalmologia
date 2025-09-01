@@ -343,6 +343,34 @@ export class UsersService {
     });
   }
 
+  async validateCurrentPassword(userId: string, currentPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'User not found',
+      });
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash
+    );
+
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException({
+        messageKey: 'ERROR.INVALID_CURRENT_PASSWORD',
+        message: 'Current password is incorrect',
+      });
+    }
+
+    return {
+      messageKey: 'USER.PASSWORD_VALIDATED',
+      data: { valid: true },
+    };
+  }
+
   async updateCurrent(
     userId: string,
     updateCurrentUserDto: UpdateCurrentUserDto,

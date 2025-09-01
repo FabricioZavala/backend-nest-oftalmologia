@@ -18,6 +18,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UpdateCurrentUserDto } from './dtos/update-current-user.dto';
+import { ValidateCurrentPasswordDto } from './dtos/validate-current-password.dto';
 import { QueryUserDto } from './dtos/query-user.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { User } from './entities/user.entity';
@@ -63,6 +64,14 @@ export class UsersController {
     @Body(ValidationPipe) updateUserDto: UpdateUserDto
   ) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Post('validate-current-password')
+  async validateCurrentPassword(
+    @CurrentUser() user: User,
+    @Body(ValidationPipe) validatePasswordDto: ValidateCurrentPasswordDto
+  ) {
+    return this.usersService.validateCurrentPassword(user.id, validatePasswordDto.currentPassword);
   }
 
   @Delete('delete/:id')

@@ -32,9 +32,13 @@
     "es": "Usuarios obtenidos correctamente",
     "en": "Users fetched successfully"
   },
-  "USER.FETCHED": {
-    "es": "Usuario obtenido correctamente",
-    "en": "User fetched successfully"
+  "USER.PROFILE_UPDATED": {
+    "es": "Perfil actualizado correctamente",
+    "en": "Profile updated successfully"
+  },
+  "USER.PASSWORD_VALIDATED": {
+    "es": "Contraseña actual validada correctamente",
+    "en": "Current password validated successfully"
   },
 
   "ROLE.CREATED": {
@@ -131,5 +135,13 @@
   "ERROR.INVALID_TOKEN": {
     "es": "Token inválido",
     "en": "Invalid token"
+  },
+  "ERROR.INVALID_CURRENT_PASSWORD": {
+    "es": "La contraseña actual es incorrecta",
+    "en": "Current password is incorrect"
+  },
+  "ERROR.BOTH_PASSWORDS_REQUIRED": {
+    "es": "Se requieren tanto la contraseña actual como la nueva para cambiar la contraseña",
+    "en": "Both current password and new password are required for password change"
   }
 }
