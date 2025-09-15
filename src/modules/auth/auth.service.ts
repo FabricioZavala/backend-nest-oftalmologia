@@ -12,12 +12,14 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { User } from '../users/entities/user.entity';
+import { Branch } from '../branches/entities/branch.entity';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { EmailUtil } from '../../common/utils/email.util';
+import { AdminBranchSessionService } from '../../common/services/admin-branch-session.service';
 
 @Injectable()
 export class AuthService {
@@ -26,9 +28,12 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Branch)
+    private branchRepository: Repository<Branch>,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private emailUtil: EmailUtil
+    private emailUtil: EmailUtil,
+    private adminBranchSessionService: AdminBranchSessionService
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -155,6 +160,7 @@ export class AuthService {
         'role',
         'role.rolePermissions',
         'role.rolePermissions.permission',
+        'branch',
       ],
     });
 
@@ -169,6 +175,8 @@ export class AuthService {
         ?.filter((rp) => rp.isEnabled && rp.permission.isActive)
         ?.map((rp) => rp.permission.id) || [];
 
+    const isAdmin = user.role?.roleName === 'Admin';
+
     return {
       messageKey: 'AUTH.GET_ME.SUCCESS',
       data: {
@@ -178,6 +186,8 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        branch: user.branch,
+        isAdmin: isAdmin,
         profilePhoto: user.profilePhoto,
         address: user.address,
         documentNumber: user.documentNumber,
@@ -325,6 +335,74 @@ export class AuthService {
     return {
       messageKey: 'AUTH.PASSWORD_RESET',
       message: 'Password has been reset successfully',
+    };
+  }
+
+  async setAdminBranchFilter(userId: string, branchId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role'],
+    });
+
+    if (!user || user.role?.roleName !== 'Admin') {
+      throw new UnauthorizedException({
+        messageKey: 'ERROR.ADMIN_REQUIRED',
+        message: 'Only admin users can set branch filters',
+      });
+    }
+
+    const branch = await this.branchRepository.findOne({
+      where: { id: branchId },
+    });
+
+    if (!branch) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.BRANCH_NOT_FOUND',
+        message: 'Branch not found',
+      });
+    }
+
+    if (!branch.isActive) {
+      throw new BadRequestException({
+        messageKey: 'ERROR.BRANCH_INACTIVE',
+        message: 'Branch is not active',
+      });
+    }
+
+    this.adminBranchSessionService.setAdminBranchSelection(userId, branchId);
+
+    return {
+      messageKey: 'AUTH.ADMIN_BRANCH_FILTER_SET',
+      message: 'Admin branch filter set successfully',
+      data: {
+        selectedBranch: branch,
+        isTemporarySelection: true,
+      },
+    };
+  }
+
+  async clearAdminBranchFilter(userId: string) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['role', 'branch'],
+    });
+
+    if (!user || user.role?.roleName !== 'Admin') {
+      throw new UnauthorizedException({
+        messageKey: 'ERROR.ADMIN_REQUIRED',
+        message: 'Only admin users can clear branch filters',
+      });
+    }
+
+    this.adminBranchSessionService.clearAdminBranchSelection(userId);
+
+    return {
+      messageKey: 'AUTH.ADMIN_BRANCH_FILTER_CLEARED',
+      message: 'Admin branch filter cleared successfully',
+      data: {
+        defaultBranch: user.branch,
+        isTemporarySelection: false,
+      },
     };
   }
 }

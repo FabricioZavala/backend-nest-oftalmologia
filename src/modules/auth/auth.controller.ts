@@ -57,6 +57,23 @@ export class AuthController {
     return result;
   }
 
+  @Post('set-admin-branch-filter')
+  @UseGuards(AuthGuard('jwt'))
+  async setAdminBranchFilter(
+    @CurrentUser() user: User,
+    @Body() setAdminBranchFilterDto: any
+  ) {
+    this.logger.log(`Admin ${user.id} setting branch filter to: ${setAdminBranchFilterDto.branchId}`);
+    return this.authService.setAdminBranchFilter(user.id, setAdminBranchFilterDto.branchId);
+  }
+
+  @Post('clear-admin-branch-filter')
+  @UseGuards(AuthGuard('jwt'))
+  async clearAdminBranchFilter(@CurrentUser() user: User) {
+    this.logger.log(`Admin ${user.id} clearing branch filter`);
+    return this.authService.clearAdminBranchFilter(user.id);
+  }
+
   @Post('change-password')
   @UseGuards(AuthGuard('jwt'))
   async changePassword(

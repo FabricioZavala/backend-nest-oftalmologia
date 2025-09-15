@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Role } from '../../roles-permissions/entities/role.entity';
+import { Branch } from '../../branches/entities/branch.entity';
 
 @Entity('users')
 export class User {
@@ -31,6 +32,9 @@ export class User {
 
   @Column({ name: 'role_id' })
   roleId: string;
+
+  @Column({ name: 'branch_id', nullable: true })
+  branchId: string;
 
   @Column({ name: 'profile_photo', nullable: true })
   profilePhoto: string;
@@ -78,4 +82,8 @@ export class User {
   @ManyToOne(() => Role, (role) => role.users)
   @JoinColumn({ name: 'role_id' })
   role: Role;
+
+  @ManyToOne(() => Branch)
+  @JoinColumn({ name: 'branch_id' })
+  branch: Branch;
 }

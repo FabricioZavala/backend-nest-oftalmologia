@@ -32,6 +32,10 @@ export class CreateUserDto {
   @IsUUID()
   roleId: string;
 
+  @IsOptional()
+  @IsUUID()
+  branchId?: string;
+
   @IsString()
   @MinLength(1)
   documentNumber: string;
