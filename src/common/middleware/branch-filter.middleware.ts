@@ -21,14 +21,13 @@ export class BranchFilterMiddleware implements NestMiddleware {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private jwtService: JwtService,
-    private adminBranchSessionService: AdminBranchSessionService,
+    private adminBranchSessionService: AdminBranchSessionService
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     // Lista de rutas que NO requieren filtrado por sucursal
     const excludedRoutes = [
       'auth',
-      'user',
       'roles',
       'permission',
       'module',
@@ -52,27 +51,32 @@ export class BranchFilterMiddleware implements NestMiddleware {
       try {
         const token = authHeader.substring(7);
         const decoded = this.jwtService.decode(token) as any;
-        
+
         if (decoded && decoded.sub) {
           currentUser = await this.userRepository.findOne({
             where: { id: decoded.sub },
             relations: ['role', 'branch'],
           });
         }
-      } catch (error) {
-      }
+      } catch (error) {}
     }
 
     let branchId: string;
 
     if (currentUser?.role?.roleName === 'Admin') {
       const adminBranchId = req.headers['x-admin-branch-id'] as string;
-      
+
       if (adminBranchId) {
         branchId = adminBranchId;
-        this.adminBranchSessionService.setAdminBranchSelection(currentUser.id, adminBranchId);
+        this.adminBranchSessionService.setAdminBranchSelection(
+          currentUser.id,
+          adminBranchId
+        );
       } else {
-        const savedAdminSelection = this.adminBranchSessionService.getAdminBranchSelection(currentUser.id);
+        const savedAdminSelection =
+          this.adminBranchSessionService.getAdminBranchSelection(
+            currentUser.id
+          );
         if (savedAdminSelection) {
           branchId = savedAdminSelection;
         } else {
@@ -83,9 +87,11 @@ export class BranchFilterMiddleware implements NestMiddleware {
       if (currentUser?.branchId) {
         branchId = currentUser.branchId;
       } else {
-        console.warn(`Usuario ${currentUser?.id} no tiene sucursal asignada. Usando fallback.`);
+        console.warn(
+          `Usuario ${currentUser?.id} no tiene sucursal asignada. Usando fallback.`
+        );
         branchId = req.headers['x-branch-id'] as string;
-        
+
         if (!branchId) {
           throw new BadRequestException({
             statusCode: 400,
@@ -149,8 +155,10 @@ export class BranchFilterMiddleware implements NestMiddleware {
 
     (req as any).branchId = branchId;
     (req as any).currentUser = currentUser;
-    (req as any).isAdminFiltering = currentUser?.role?.roleName === 'Admin' && req.headers['x-admin-branch-id'];
-    
+    (req as any).isAdminFiltering =
+      currentUser?.role?.roleName === 'Admin' &&
+      req.headers['x-admin-branch-id'];
+
     next();
   }
 }
