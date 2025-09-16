@@ -24,6 +24,9 @@ export class Subcategory {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  description: string;
+
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 

@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUUID, Length } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, Length, IsOptional } from 'class-validator';
 
 export class CreateSubcategoryDto {
   @IsString()
@@ -10,4 +10,9 @@ export class CreateSubcategoryDto {
   @IsNotEmpty()
   @Length(1, 100)
   name: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  description?: string;
 }
