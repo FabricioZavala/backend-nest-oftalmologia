@@ -58,6 +58,14 @@ export class SuppliersService {
   }
 
   async findAll(queryDto: QuerySupplierDto, branchId: string) {
+    if (!branchId) {
+      throw new Error('BranchId is required but was not provided');
+    }
+
+    if (typeof branchId !== 'string' || branchId.trim() === '') {
+      throw new Error(`Invalid branchId: ${branchId}`);
+    }
+
     const { skip, take } = PaginationUtil.getSkipAndTake(queryDto);
     const queryBuilder = this.supplierRepository.createQueryBuilder('supplier');
 
@@ -65,9 +73,33 @@ export class SuppliersService {
 
     if (queryDto.search) {
       queryBuilder.andWhere(
-        'supplier.name ILIKE :search OR supplier.documentNumber ILIKE :search OR supplier.email ILIKE :search',
+        'supplier.name ILIKE :search OR supplier.documentNumber ILIKE :search OR supplier.email ILIKE :search OR supplier.phone ILIKE :search',
         { search: `%${queryDto.search}%` }
       );
+    }
+
+    if (queryDto.name) {
+      queryBuilder.andWhere('supplier.name ILIKE :name', {
+        name: `%${queryDto.name}%`,
+      });
+    }
+
+    if (queryDto.documentNumber) {
+      queryBuilder.andWhere('supplier.documentNumber ILIKE :documentNumber', {
+        documentNumber: `%${queryDto.documentNumber}%`,
+      });
+    }
+
+    if (queryDto.email) {
+      queryBuilder.andWhere('supplier.email ILIKE :email', {
+        email: `%${queryDto.email}%`,
+      });
+    }
+
+    if (queryDto.phone) {
+      queryBuilder.andWhere('supplier.phone ILIKE :phone', {
+        phone: `%${queryDto.phone}%`,
+      });
     }
 
     if (queryDto.isActive !== undefined) {
@@ -79,6 +111,40 @@ export class SuppliersService {
     queryBuilder.orderBy('supplier.createdAt', 'DESC').skip(skip).take(take);
 
     const [suppliers, totalCount] = await queryBuilder.getManyAndCount();
+
+    const invalidSuppliers = suppliers.filter((s) => s.branchId !== branchId);
+    if (invalidSuppliers.length > 0) {
+      console.error(
+        ' [SuppliersService] CRITICAL ERROR: Found suppliers from other branches!'
+      );
+      console.error('[SuppliersService] Expected branchId:', branchId);
+      console.error(
+        '[SuppliersService] Invalid suppliers:',
+        invalidSuppliers.map((s) => ({
+          id: s.id,
+          name: s.name,
+          branchId: s.branchId,
+        }))
+      );
+
+      const validSuppliers = suppliers.filter((s) => s.branchId === branchId);
+
+      const paginationResult = PaginationUtil.paginate(
+        validSuppliers,
+        validSuppliers.length,
+        queryDto
+      );
+
+      return {
+        statusCode: 200,
+        success: true,
+        message: {
+          es: 'Proveedores obtenidos exitosamente',
+          en: 'Suppliers retrieved successfully',
+        },
+        data: paginationResult,
+      };
+    }
 
     const paginationResult = PaginationUtil.paginate(
       suppliers,

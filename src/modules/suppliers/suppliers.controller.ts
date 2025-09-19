@@ -36,7 +36,12 @@ export class SuppliersController {
     @Query(ValidationPipe) queryDto: QuerySupplierDto,
     @BranchContext() branchId: string
   ) {
-    return this.suppliersService.findAll(queryDto, branchId);
+    const result = await this.suppliersService.findAll(queryDto, branchId);
+
+    if (result.data?.result?.length > 0) {
+    }
+
+    return result;
   }
 
   @Get(':id')
