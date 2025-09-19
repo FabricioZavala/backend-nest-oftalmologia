@@ -24,7 +24,6 @@ export class PermissionsService {
   async create(createPermissionDto: CreatePermissionDto) {
     const { permissionName, moduleId } = createPermissionDto;
 
-    // Check if module exists
     const module = await this.moduleRepository.findOne({
       where: { id: moduleId },
     });
@@ -36,7 +35,6 @@ export class PermissionsService {
       });
     }
 
-    // Check if permission name already exists within the same module
     const existingPermission = await this.permissionRepository.findOne({
       where: { permissionName, moduleId },
     });
@@ -51,7 +49,6 @@ export class PermissionsService {
     const permission = this.permissionRepository.create(createPermissionDto);
     const savedPermission = await this.permissionRepository.save(permission);
 
-    // Load the saved permission with module relation
     const permissionWithModule = await this.permissionRepository.findOne({
       where: { id: savedPermission.id },
       relations: ['module'],
@@ -71,7 +68,6 @@ export class PermissionsService {
       .createQueryBuilder('permission')
       .leftJoinAndSelect('permission.module', 'module');
 
-    // Apply filters
     if (search) {
       queryBuilder.andWhere(
         '(permission.permissionName ILIKE :search OR permission.description ILIKE :search)',
@@ -87,10 +83,8 @@ export class PermissionsService {
       queryBuilder.andWhere('permission.isActive = :isActive', { isActive });
     }
 
-    // Get total count
     const totalCount = await queryBuilder.getCount();
 
-    // Apply pagination and get results
     const permissions = await queryBuilder
       .orderBy('permission.createdAt', 'DESC')
       .skip(skip)
@@ -139,7 +133,6 @@ export class PermissionsService {
 
     const { permissionName, moduleId } = updatePermissionDto;
 
-    // If moduleId is being updated, check if it exists
     if (moduleId && moduleId !== permission.moduleId) {
       const module = await this.moduleRepository.findOne({
         where: { id: moduleId },
@@ -153,7 +146,6 @@ export class PermissionsService {
       }
     }
 
-    // Check for permission name conflict within the target module
     if (permissionName || moduleId) {
       const targetModuleId = moduleId || permission.moduleId;
       const targetPermissionName = permissionName || permission.permissionName;
@@ -203,7 +195,6 @@ export class PermissionsService {
       });
     }
 
-    // Check if permission has associated role permissions
     if (permission.rolePermissions && permission.rolePermissions.length > 0) {
       throw new ConflictException({
         messageKey: 'ERROR.VALIDATION',

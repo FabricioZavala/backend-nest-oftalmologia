@@ -34,7 +34,6 @@ export class PermissionsGuard implements CanActivate {
       return false;
     }
 
-    // Obtener permisos del rol del usuario
     const rolePermissions = await this.rolePermissionRepository
       .createQueryBuilder('rp')
       .leftJoinAndSelect('rp.permission', 'permission')
@@ -47,7 +46,6 @@ export class PermissionsGuard implements CanActivate {
       (rp) => rp.permission.permissionName
     );
 
-    // Verificar si el usuario tiene al menos uno de los permisos requeridos
     return requiredPermissions.some((permission) =>
       userPermissions.includes(permission)
     );

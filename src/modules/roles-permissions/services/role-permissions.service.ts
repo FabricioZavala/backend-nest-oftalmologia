@@ -24,7 +24,6 @@ export class RolePermissionsService {
   async assignPermissionToRole(assignDto: AssignPermissionToRoleDto) {
     const { roleId, permissionId, isEnabled = true } = assignDto;
 
-    // Verificar que el rol existe
     const role = await this.roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
       throw new NotFoundException({
@@ -33,7 +32,6 @@ export class RolePermissionsService {
       });
     }
 
-    // Verificar que el permiso existe
     const permission = await this.permissionRepository.findOne({
       where: { id: permissionId },
     });
@@ -44,13 +42,11 @@ export class RolePermissionsService {
       });
     }
 
-    // Verificar si ya existe la asignación
     let existingAssignment = await this.rolePermissionRepository.findOne({
       where: { roleId, permissionId },
     });
 
     if (existingAssignment) {
-      // Actualizar la asignación existente
       existingAssignment.isEnabled = isEnabled;
       await this.rolePermissionRepository.save(existingAssignment);
 
@@ -59,7 +55,6 @@ export class RolePermissionsService {
         data: existingAssignment,
       };
     } else {
-      // Crear nueva asignación
       const newAssignment = this.rolePermissionRepository.create({
         roleId,
         permissionId,

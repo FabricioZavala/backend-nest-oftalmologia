@@ -35,7 +35,6 @@ export class TransformInterceptor<T>
         let responseData = data;
         let totalCount = undefined;
 
-        // Extract messageKey if it exists in the data
         if (data && typeof data === 'object' && 'messageKey' in data) {
           messageKey = data.messageKey;
           responseData = data.data || data;
@@ -43,13 +42,11 @@ export class TransformInterceptor<T>
           delete data.messageKey;
         }
 
-        // Get message from messages.json
         const messageObj = messages[messageKey] || {
           es: 'Operación completada',
           en: 'Operation completed',
         };
 
-        // Format data based on whether it's an array (list) or single object
         let formattedData;
         if (Array.isArray(responseData)) {
           formattedData = {

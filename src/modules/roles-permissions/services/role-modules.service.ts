@@ -20,7 +20,6 @@ export class RoleModulesService {
   async assignModuleToRole(assignDto: AssignModuleToRoleDto) {
     const { roleId, moduleId, isEnabled = true } = assignDto;
 
-    // Verificar que el rol existe
     const role = await this.roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
       throw new NotFoundException({
@@ -29,7 +28,6 @@ export class RoleModulesService {
       });
     }
 
-    // Verificar que el módulo existe
     const module = await this.moduleRepository.findOne({
       where: { id: moduleId },
     });
@@ -40,13 +38,11 @@ export class RoleModulesService {
       });
     }
 
-    // Verificar si ya existe la asignación
     let existingAssignment = await this.roleModuleRepository.findOne({
       where: { roleId, moduleId },
     });
 
     if (existingAssignment) {
-      // Actualizar la asignación existente
       existingAssignment.isEnabled = isEnabled;
       await this.roleModuleRepository.save(existingAssignment);
 
@@ -55,7 +51,6 @@ export class RoleModulesService {
         data: existingAssignment,
       };
     } else {
-      // Crear nueva asignación
       const newAssignment = this.roleModuleRepository.create({
         roleId,
         moduleId,

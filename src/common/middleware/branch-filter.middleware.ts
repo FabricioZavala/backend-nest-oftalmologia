@@ -25,7 +25,6 @@ export class BranchFilterMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    // Lista de rutas que NO requieren filtrado por sucursal
     const excludedRoutes = [
       'auth',
       'roles',

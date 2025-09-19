@@ -32,7 +32,7 @@ export class FilesService {
       });
     }
 
-    const maxSize = 8 * 1024 * 1024; // 8MB en bytes
+    const maxSize = 8 * 1024 * 1024; // 8MB
     if (file.size > maxSize) {
       throw new BadRequestException({
         messageKey: 'ERROR.FILE_TOO_LARGE',
@@ -78,7 +78,6 @@ export class FilesService {
 
       fs.writeFileSync(filePath, file.buffer);
 
-      // Deactivate previous files of the same category for the entity
       if (uploadFileDto.fileCategory) {
         await this.fileRepository.update(
           {
@@ -90,7 +89,6 @@ export class FilesService {
         );
       }
 
-      // Save file info to database
       const fileEntity = this.fileRepository.create({
         filename: uniqueFilename,
         originalName: file.originalname,

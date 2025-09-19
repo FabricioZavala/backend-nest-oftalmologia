@@ -21,7 +21,6 @@ export class RolesService {
   async create(createRoleDto: CreateRoleDto) {
     const { roleName } = createRoleDto;
 
-    // Check if role name already exists
     const existingRole = await this.roleRepository.findOne({
       where: { roleName },
     });
@@ -48,7 +47,6 @@ export class RolesService {
 
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
-    // Apply filters
     if (search) {
       queryBuilder.andWhere(
         '(role.roleName ILIKE :search OR role.description ILIKE :search)',
@@ -60,10 +58,8 @@ export class RolesService {
       queryBuilder.andWhere('role.isActive = :isActive', { isActive });
     }
 
-    // Get total count
     const totalCount = await queryBuilder.getCount();
 
-    // Apply pagination and get results
     const roles = await queryBuilder
       .orderBy('role.createdAt', 'DESC')
       .skip(skip)
@@ -109,7 +105,6 @@ export class RolesService {
 
     const { roleName } = updateRoleDto;
 
-    // Check for role name conflict if it's being updated
     if (roleName && roleName !== role.roleName) {
       const existingRole = await this.roleRepository.findOne({
         where: { roleName },
@@ -146,7 +141,6 @@ export class RolesService {
       });
     }
 
-    // Check if role has associated users
     if (role.users && role.users.length > 0) {
       throw new ConflictException({
         messageKey: 'ERROR.VALIDATION',

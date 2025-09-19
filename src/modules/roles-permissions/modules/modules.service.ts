@@ -21,7 +21,6 @@ export class ModulesService {
   async create(createModuleDto: CreateModuleDto) {
     const { moduleName } = createModuleDto;
 
-    // Check if module name already exists
     const existingModule = await this.moduleRepository.findOne({
       where: { moduleName },
     });
@@ -48,7 +47,6 @@ export class ModulesService {
 
     const queryBuilder = this.moduleRepository.createQueryBuilder('module');
 
-    // Apply filters
     if (search) {
       queryBuilder.andWhere(
         '(module.moduleName ILIKE :search OR module.description ILIKE :search)',
@@ -60,10 +58,8 @@ export class ModulesService {
       queryBuilder.andWhere('module.isActive = :isActive', { isActive });
     }
 
-    // Get total count
     const totalCount = await queryBuilder.getCount();
 
-    // Apply pagination and get results
     const modules = await queryBuilder
       .orderBy('module.createdAt', 'DESC')
       .skip(skip)
@@ -110,7 +106,6 @@ export class ModulesService {
 
     const { moduleName } = updateModuleDto;
 
-    // Check for module name conflict if it's being updated
     if (moduleName && moduleName !== module.moduleName) {
       const existingModule = await this.moduleRepository.findOne({
         where: { moduleName },
@@ -147,7 +142,6 @@ export class ModulesService {
       });
     }
 
-    // Check if module has associated permissions
     if (module.permissions && module.permissions.length > 0) {
       throw new ConflictException({
         messageKey: 'ERROR.VALIDATION',
