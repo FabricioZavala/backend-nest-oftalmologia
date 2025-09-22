@@ -77,11 +77,34 @@ export class ProductsService {
 
     queryBuilder.where('product.branchId = :branchId', { branchId });
 
-    if (queryDto.q) {
-      queryBuilder.andWhere(
-        'product.name ILIKE :search OR product.code ILIKE :search OR product.brand ILIKE :search',
-        { search: `%${queryDto.q}%` }
-      );
+    if (queryDto.code) {
+      queryBuilder.andWhere('product.code ILIKE :code', {
+        code: `%${queryDto.code}%`,
+      });
+    }
+
+    if (queryDto.name) {
+      queryBuilder.andWhere('product.name ILIKE :name', {
+        name: `%${queryDto.name}%`,
+      });
+    }
+
+    if (queryDto.brand) {
+      queryBuilder.andWhere('product.brand ILIKE :brand', {
+        brand: `%${queryDto.brand}%`,
+      });
+    }
+
+    if (queryDto.unitPrice !== undefined) {
+      queryBuilder.andWhere('product.unitPrice = :unitPrice', {
+        unitPrice: queryDto.unitPrice,
+      });
+    }
+
+    if (queryDto.quantity !== undefined) {
+      queryBuilder.andWhere('product.quantity = :quantity', {
+        quantity: queryDto.quantity,
+      });
     }
 
     if (queryDto.categoryId) {

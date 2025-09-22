@@ -11,7 +11,25 @@ import { Transform } from 'class-transformer';
 export class QueryProductDto {
   @IsOptional()
   @IsString()
-  q?: string;
+  code?: string;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  brand?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseFloat(value))
+  unitPrice?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Transform(({ value }) => parseInt(value))
+  quantity?: number;
 
   @IsOptional()
   @IsUUID()
