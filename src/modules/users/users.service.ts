@@ -95,6 +95,7 @@ export class UsersService {
       mobilePhone,
       address,
       roleId,
+      branchId,
       isActive,
       isLocked,
     } = queryDto;
@@ -104,6 +105,7 @@ export class UsersService {
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
+      .leftJoinAndSelect('user.branch', 'branch')
       .select([
         'user.id',
         'user.username',
@@ -124,6 +126,9 @@ export class UsersService {
         'role.id',
         'role.roleName',
         'role.description',
+        'branch.id',
+        'branch.name',
+        'branch.code',
       ]);
 
     if (search) {
@@ -171,6 +176,10 @@ export class UsersService {
       queryBuilder.andWhere('user.roleId = :roleId', { roleId });
     }
 
+    if (branchId) {
+      queryBuilder.andWhere('user.branchId = :branchId', { branchId });
+    }
+
     if (typeof isActive === 'boolean') {
       queryBuilder.andWhere('user.isActive = :isActive', { isActive });
     }
@@ -201,7 +210,7 @@ export class UsersService {
   async findOne(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
-      relations: ['role'],
+      relations: ['role', 'branch'],
       select: {
         id: true,
         username: true,
@@ -224,6 +233,11 @@ export class UsersService {
           id: true,
           roleName: true,
           description: true,
+        },
+        branch: {
+          id: true,
+          name: true,
+          code: true,
         },
       },
     });
@@ -486,5 +500,44 @@ export class UsersService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async searchUsers(query: string) {
+    if (!query || query.trim().length < 2) {
+      return {
+        messageKey: 'USER.SEARCH_QUERY_TOO_SHORT',
+        data: [],
+      };
+    }
+
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.branch', 'branch')
+      .select([
+        'user.id',
+        'user.firstName',
+        'user.lastName',
+        'user.email',
+        'user.documentNumber',
+        'user.mobilePhone',
+        'user.profilePhoto',
+        'user.branchId',
+        'branch.id',
+        'branch.name',
+        'branch.code',
+      ])
+      .where('user.isActive = :isActive', { isActive: true })
+      .andWhere(
+        '(user.firstName ILIKE :query OR user.lastName ILIKE :query OR user.email ILIKE :query OR user.documentNumber ILIKE :query)',
+        { query: `%${query.trim()}%` }
+      )
+      .orderBy('user.firstName', 'ASC')
+      .limit(20)
+      .getMany();
+
+    return {
+      messageKey: 'USER.SEARCH_RESULTS',
+      data: users,
+    };
   }
 }

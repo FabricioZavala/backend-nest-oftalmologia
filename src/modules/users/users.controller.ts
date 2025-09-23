@@ -71,11 +71,19 @@ export class UsersController {
     @CurrentUser() user: User,
     @Body(ValidationPipe) validatePasswordDto: ValidateCurrentPasswordDto
   ) {
-    return this.usersService.validateCurrentPassword(user.id, validatePasswordDto.currentPassword);
+    return this.usersService.validateCurrentPassword(
+      user.id,
+      validatePasswordDto.currentPassword
+    );
   }
 
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Get('search')
+  async searchUsers(@Query('q') query: string) {
+    return this.usersService.searchUsers(query);
   }
 }

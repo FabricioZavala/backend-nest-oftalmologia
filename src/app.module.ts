@@ -27,6 +27,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { SubcategoriesModule } from './modules/subcategories/subcategories.module';
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { ProductsModule } from './modules/products/products.module';
+import { ShiftManagementModule } from './modules/shift-management/shift-management.module';
 
 // Entities
 import { User } from './modules/users/entities/user.entity';
@@ -41,6 +42,8 @@ import { Category } from './modules/categories/entities/category.entity';
 import { Subcategory } from './modules/subcategories/entities/subcategory.entity';
 import { Supplier } from './modules/suppliers/entities/supplier.entity';
 import { Product } from './modules/products/entities/product.entity';
+import { Shift } from './modules/shift-management/entities/shift.entity';
+import { ShiftStatus } from './modules/shift-management/entities/shift-status.entity';
 
 @Module({
   imports: [
@@ -71,6 +74,8 @@ import { Product } from './modules/products/entities/product.entity';
           Subcategory,
           Supplier,
           Product,
+          Shift,
+          ShiftStatus,
         ],
         synchronize: true,
         dropSchema: false,
@@ -90,6 +95,7 @@ import { Product } from './modules/products/entities/product.entity';
     SubcategoriesModule,
     SuppliersModule,
     ProductsModule,
+    ShiftManagementModule,
   ],
   providers: [
     {
