@@ -56,8 +56,18 @@ export class ShiftsService {
   }
 
   async findAll(queryDto: QueryShiftDto, branchId: string) {
-    const { page, limit, search, userId, statusId, dateFrom, dateTo } =
-      queryDto;
+    const {
+      page,
+      limit,
+      patientName,
+      patientId,
+      phone,
+      email,
+      userId,
+      statusId,
+      dateFrom,
+      dateTo,
+    } = queryDto;
 
     const { skip, take } = PaginationUtil.getSkipAndTake({ page, limit });
 
@@ -89,11 +99,29 @@ export class ShiftsService {
       ])
       .where('shift.branchId = :branchId', { branchId });
 
-    if (search) {
+    if (patientName) {
       queryBuilder.andWhere(
-        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search OR user.documentNumber ILIKE :search OR shift.description ILIKE :search)',
-        { search: `%${search}%` }
+        '(user.firstName ILIKE :patientName OR user.lastName ILIKE :patientName)',
+        { patientName: `%${patientName}%` }
       );
+    }
+
+    if (patientId) {
+      queryBuilder.andWhere('user.documentNumber ILIKE :patientId', {
+        patientId: `%${patientId}%`,
+      });
+    }
+
+    if (phone) {
+      queryBuilder.andWhere('user.mobilePhone ILIKE :phone', {
+        phone: `%${phone}%`,
+      });
+    }
+
+    if (email) {
+      queryBuilder.andWhere('user.email ILIKE :email', {
+        email: `%${email}%`,
+      });
     }
 
     if (userId) {

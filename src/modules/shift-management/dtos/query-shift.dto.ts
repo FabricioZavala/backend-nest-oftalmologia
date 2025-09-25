@@ -26,7 +26,19 @@ export class QueryShiftDto {
 
   @IsOptional()
   @IsString()
-  search?: string;
+  patientName?: string;
+
+  @IsOptional()
+  @IsString()
+  patientId?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
 
   @IsOptional()
   @IsUUID()
