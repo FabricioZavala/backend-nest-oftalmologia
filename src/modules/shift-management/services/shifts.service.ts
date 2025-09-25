@@ -28,8 +28,8 @@ export class ShiftsService {
     private branchRepository: Repository<Branch>
   ) {}
 
-  async create(createShiftDto: CreateShiftDto) {
-    const { userId, branchId, appointmentDate } = createShiftDto;
+  async create(createShiftDto: CreateShiftDto, branchId: string) {
+    const { userId, appointmentDate } = createShiftDto;
 
     await this.validateUser(userId);
     await this.validateBranch(branchId);
@@ -42,6 +42,7 @@ export class ShiftsService {
 
     const shift = this.shiftRepository.create({
       ...createShiftDto,
+      branchId,
       appointmentDate: appointmentDateTime,
       statusId: pendingStatus.id,
     });
@@ -54,17 +55,9 @@ export class ShiftsService {
     };
   }
 
-  async findAll(queryDto: QueryShiftDto) {
-    const {
-      page,
-      limit,
-      search,
-      userId,
-      statusId,
-      branchId,
-      dateFrom,
-      dateTo,
-    } = queryDto;
+  async findAll(queryDto: QueryShiftDto, branchId: string) {
+    const { page, limit, search, userId, statusId, dateFrom, dateTo } =
+      queryDto;
 
     const { skip, take } = PaginationUtil.getSkipAndTake({ page, limit });
 
@@ -93,7 +86,8 @@ export class ShiftsService {
         'status.color',
         'branch.id',
         'branch.name',
-      ]);
+      ])
+      .where('shift.branchId = :branchId', { branchId });
 
     if (search) {
       queryBuilder.andWhere(
@@ -108,10 +102,6 @@ export class ShiftsService {
 
     if (statusId) {
       queryBuilder.andWhere('shift.statusId = :statusId', { statusId });
-    }
-
-    if (branchId) {
-      queryBuilder.andWhere('shift.branchId = :branchId', { branchId });
     }
 
     if (dateFrom && dateTo) {
@@ -140,9 +130,9 @@ export class ShiftsService {
     };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, branchId: string) {
     const shift = await this.shiftRepository.findOne({
-      where: { id },
+      where: { id, branchId },
       relations: ['user', 'status', 'branch'],
       select: {
         id: true,
@@ -185,9 +175,9 @@ export class ShiftsService {
     };
   }
 
-  async update(id: string, updateShiftDto: UpdateShiftDto) {
+  async update(id: string, updateShiftDto: UpdateShiftDto, branchId: string) {
     const shift = await this.shiftRepository.findOne({
-      where: { id },
+      where: { id, branchId },
     });
 
     if (!shift) {
@@ -224,9 +214,9 @@ export class ShiftsService {
     };
   }
 
-  async remove(id: string) {
+  async remove(id: string, branchId: string) {
     const shift = await this.shiftRepository.findOne({
-      where: { id },
+      where: { id, branchId },
     });
 
     if (!shift) {

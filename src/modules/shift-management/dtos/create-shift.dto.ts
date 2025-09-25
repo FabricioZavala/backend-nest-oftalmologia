@@ -11,10 +11,6 @@ export class CreateShiftDto {
   @IsNotEmpty()
   userId: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  branchId: string;
-
   @IsDateString()
   @IsNotEmpty()
   appointmentDate: string;
