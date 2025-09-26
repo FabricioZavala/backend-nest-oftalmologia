@@ -28,6 +28,8 @@ import { SubcategoriesModule } from './modules/subcategories/subcategories.modul
 import { SuppliersModule } from './modules/suppliers/suppliers.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ShiftManagementModule } from './modules/shift-management/shift-management.module';
+import { ClinicalFormConfigModule } from './modules/clinical-form-config/clinical-form-config.module';
+import { ClinicalHistoriesModule } from './modules/clinical-histories/clinical-histories.module';
 
 // Entities
 import { User } from './modules/users/entities/user.entity';
@@ -44,6 +46,8 @@ import { Supplier } from './modules/suppliers/entities/supplier.entity';
 import { Product } from './modules/products/entities/product.entity';
 import { Shift } from './modules/shift-management/entities/shift.entity';
 import { ShiftStatus } from './modules/shift-management/entities/shift-status.entity';
+import { ClinicalFormConfig } from './modules/clinical-form-config/entities/clinical-form-config.entity';
+import { ClinicalHistory } from './modules/clinical-histories/entities/clinical-history.entity';
 
 @Module({
   imports: [
@@ -76,6 +80,8 @@ import { ShiftStatus } from './modules/shift-management/entities/shift-status.en
           Product,
           Shift,
           ShiftStatus,
+          ClinicalFormConfig,
+          ClinicalHistory,
         ],
         synchronize: true,
         dropSchema: false,
@@ -96,6 +102,8 @@ import { ShiftStatus } from './modules/shift-management/entities/shift-status.en
     SuppliersModule,
     ProductsModule,
     ShiftManagementModule,
+    ClinicalFormConfigModule,
+    ClinicalHistoriesModule,
   ],
   providers: [
     {
