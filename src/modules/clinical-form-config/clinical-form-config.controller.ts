@@ -50,6 +50,21 @@ export class ClinicalFormConfigController {
     return this.configService.update(id, updateDto, branchId);
   }
 
+  @Post('initialize')
+  @RequirePermissions('clinical_config_create')
+  async initialize(@BranchContext() branchId: string) {
+    return this.configService.initializeConfig(branchId);
+  }
+
+  @Post('upsert')
+  @RequirePermissions('clinical_config_create')
+  async upsert(
+    @Body(ValidationPipe) dto: CreateClinicalFormConfigDto,
+    @BranchContext() branchId: string
+  ) {
+    return this.configService.upsert(dto, branchId);
+  }
+
   @Get(':id')
   @RequirePermissions('clinical_config_read')
   async findOne(

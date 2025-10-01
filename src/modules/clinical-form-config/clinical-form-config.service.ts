@@ -26,7 +26,7 @@ export class ClinicalFormConfigService {
     });
 
     if (!config) {
-      return this.getDefaultConfig(configName);
+      return null;
     }
 
     return {
@@ -34,6 +34,7 @@ export class ClinicalFormConfigService {
       branchId: config.branchId,
       configName: config.configName,
       fieldsConfig: config.fieldsConfig,
+      isActive: config.isActive,
       version: config.version,
       createdAt: config.createdAt,
       updatedAt: config.updatedAt,
@@ -106,6 +107,69 @@ export class ClinicalFormConfigService {
     };
   }
 
+  async initializeConfig(branchId: string) {
+    const configName = 'clinical_history_form';
+
+    const existingConfig = await this.configRepository.findOne({
+      where: {
+        branchId,
+        configName,
+        isActive: true,
+      },
+    });
+
+    if (existingConfig) {
+      return {
+        id: existingConfig.id,
+        branchId: existingConfig.branchId,
+        configName: existingConfig.configName,
+        fieldsConfig: existingConfig.fieldsConfig,
+        isActive: existingConfig.isActive,
+        version: existingConfig.version,
+        createdAt: existingConfig.createdAt,
+        updatedAt: existingConfig.updatedAt,
+      };
+    }
+
+    const defaultConfig = this.getDefaultConfig(configName);
+    const createDto: CreateClinicalFormConfigDto = {
+      configName,
+      fieldsConfig: defaultConfig.fieldsConfig,
+      isActive: true,
+      version: 1,
+    };
+
+    return this.create(createDto, branchId);
+  }
+
+  async upsert(dto: CreateClinicalFormConfigDto, branchId: string) {
+    const existingConfig = await this.configRepository.findOne({
+      where: {
+        branchId,
+        configName: dto.configName,
+        isActive: true,
+      },
+    });
+
+    if (existingConfig) {
+      Object.assign(existingConfig, dto);
+      const savedConfig = await this.configRepository.save(existingConfig);
+
+      return {
+        id: savedConfig.id,
+        branchId: savedConfig.branchId,
+        configName: savedConfig.configName,
+        fieldsConfig: savedConfig.fieldsConfig,
+        isActive: savedConfig.isActive,
+        version: savedConfig.version,
+        createdAt: savedConfig.createdAt,
+        updatedAt: savedConfig.updatedAt,
+      };
+    } else {
+      return this.create(dto, branchId);
+    }
+  }
+
   async findOne(id: string, branchId: string) {
     const config = await this.configRepository.findOne({
       where: { id, branchId },
@@ -135,7 +199,18 @@ export class ClinicalFormConfigService {
       configName,
       fieldsConfig: {
         sections: {
-          previousLensometry: {
+          step1_personalData: {
+            visible: true,
+            fields: {
+              occupation: true,
+              weight: true,
+              height: true,
+              allergies: true,
+              currentMedications: true,
+              chiefComplaint: true,
+            },
+          },
+          step2_previousLensometry: {
             visible: true,
             fields: {
               previousRxOd: true,
@@ -144,7 +219,7 @@ export class ClinicalFormConfigService {
               previousAddOi: true,
             },
           },
-          visualAcuityNoRx: {
+          step2_visualAcuityNoRx: {
             visible: true,
             fields: {
               visualAcuityOdVl: true,
@@ -153,26 +228,35 @@ export class ClinicalFormConfigService {
               visualAcuityOiVp: true,
             },
           },
-          motorTest: {
+          step2_keratometry: {
             visible: true,
             fields: {
-              motorTest: true,
+              keratometryOd: true,
+              keratometryOi: true,
             },
           },
-          finalRx: {
+          step2_retinoscopy: {
             visible: true,
             fields: {
-              finalRxOdSphere: true,
-              finalRxOdCylinder: true,
-              finalRxOdAxis: true,
-              finalRxOdAdd: true,
-              finalRxOiSphere: true,
-              finalRxOiCylinder: true,
-              finalRxOiAxis: true,
-              finalRxOiAdd: true,
+              retinoscopySphere: true,
+              retinoscopyCylinder: true,
+              retinoscopyAxis: true,
             },
           },
-          correctedAv: {
+          step2_subjectiveRefraction: {
+            visible: true,
+            fields: {
+              subjectiveRxOdSphere: true,
+              subjectiveRxOdCylinder: true,
+              subjectiveRxOdAxis: true,
+              subjectiveRxOdAdd: true,
+              subjectiveRxOiSphere: true,
+              subjectiveRxOiCylinder: true,
+              subjectiveRxOiAxis: true,
+              subjectiveRxOiAdd: true,
+            },
+          },
+          step2_visualAcuityWithRx: {
             visible: true,
             fields: {
               correctedAvOdVl: true,
@@ -181,39 +265,59 @@ export class ClinicalFormConfigService {
               correctedAvOiVp: true,
             },
           },
-          lensTypes: {
+          step2_motorTests: {
             visible: true,
             fields: {
-              lensTypes: true,
+              coverTest: true,
+              ductions: true,
+              versions: true,
+              npc: true,
+              npa: true,
+              fusionalVergences: true,
+              stereopsis: true,
             },
           },
-          pupillaryReflexes: {
+          step3_pupillaryReflexes: {
             visible: true,
             fields: {
-              pupillaryReflexes: true,
+              directReflexOd: true,
+              directReflexOi: true,
+              consensualReflexOd: true,
+              consensualReflexOi: true,
             },
           },
-          ophthalmoscopy: {
+          step3_ophthalmoscopy: {
             visible: true,
             fields: {
               ophthalmoscopyOd: true,
               ophthalmoscopyOi: true,
             },
           },
-          refractiveTests: {
+          step3_refractiveTests: {
             visible: true,
             fields: {
-              refractiveTests: true,
+              retinoscopy: true,
+              autorefraction: true,
+              keratometry: true,
             },
           },
-          additionalInfo: {
+          step3_otherExams: {
             visible: true,
             fields: {
-              stereopsis: true,
-              worthTest: true,
-              otherNotes: true,
+              biomicroscopy: true,
+              tonometry: true,
+              gonioscopy: true,
+              pachymetry: true,
+            },
+          },
+          step3_diagnosisAndDisposition: {
+            visible: true,
+            fields: {
               diagnosis: true,
-              disposition: true,
+              treatment: true,
+              recommendations: true,
+              followUp: true,
+              referral: true,
             },
           },
         },
