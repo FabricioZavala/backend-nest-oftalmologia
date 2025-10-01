@@ -40,6 +40,38 @@ export class QueryClinicalHistoryDto {
 
   @IsOptional()
   @IsString()
+  identification?: string;
+
+  @IsOptional()
+  @IsString()
+  firstName?: string;
+
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
+  dateFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  dateTo?: string;
+
+  @IsOptional()
+  @IsString()
   sortBy?: string = 'createdAt';
 
   @IsOptional()

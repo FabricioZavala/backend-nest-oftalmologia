@@ -39,7 +39,24 @@ export class ClinicalHistoriesService {
   }
 
   async findAll(queryDto: QueryClinicalHistoryDto, branchId: string) {
-    const { page, limit, userId, isSent, search, sortBy, sortOrder } = queryDto;
+    const {
+      page,
+      limit,
+      userId,
+      isSent,
+      search,
+      identification,
+      firstName,
+      lastName,
+      phone,
+      email,
+      status,
+      dateFrom,
+      dateTo,
+      sortBy,
+      sortOrder,
+    } = queryDto;
+
 
     const queryBuilder = this.clinicalHistoryRepository
       .createQueryBuilder('ch')
@@ -52,6 +69,55 @@ export class ClinicalHistoriesService {
 
     if (typeof isSent === 'boolean') {
       queryBuilder.andWhere('ch.isSent = :isSent', { isSent });
+    }
+
+    if (identification) {
+      queryBuilder.andWhere('user.documentNumber ILIKE :identification', {
+        identification: `%${identification}%`,
+      });
+    }
+
+    if (firstName) {
+      queryBuilder.andWhere('user.firstName ILIKE :firstName', {
+        firstName: `%${firstName}%`,
+      });
+    }
+
+    if (lastName) {
+      queryBuilder.andWhere('user.lastName ILIKE :lastName', {
+        lastName: `%${lastName}%`,
+      });
+    }
+
+    if (phone) {
+      queryBuilder.andWhere(
+        '(user.mobilePhone ILIKE :phone OR user.homePhone ILIKE :phone)',
+        { phone: `%${phone}%` }
+      );
+    }
+
+    if (email) {
+      queryBuilder.andWhere('user.email ILIKE :email', {
+        email: `%${email}%`,
+      });
+    }
+
+    if (status) {
+      const isSentValue =
+        status === 'enviado' ? true : status === 'pendiente' ? false : null;
+      if (isSentValue !== null) {
+        queryBuilder.andWhere('ch.isSent = :statusFilter', {
+          statusFilter: isSentValue,
+        });
+      }
+    }
+
+    if (dateFrom) {
+      queryBuilder.andWhere('ch.lastVisualExamDate >= :dateFrom', { dateFrom });
+    }
+
+    if (dateTo) {
+      queryBuilder.andWhere('ch.lastVisualExamDate <= :dateTo', { dateTo });
     }
 
     if (search) {
@@ -232,12 +298,15 @@ export class ClinicalHistoriesService {
           }
         : null,
       professionalName: clinicalHistory.professionalName,
+      occupation: clinicalHistory.occupation,
+      firstTime: clinicalHistory.firstTime,
       isSent: clinicalHistory.isSent,
       lastVisualExamDate: clinicalHistory.lastVisualExamDate,
       visionProblems: clinicalHistory.visionProblems,
       generalHealth: clinicalHistory.generalHealth,
       otherHealthProblems: clinicalHistory.otherHealthProblems,
       segmentAnterior: clinicalHistory.segmentAnterior,
+      segmentAnteriorOther: clinicalHistory.segmentAnteriorOther,
       previousRxOd: clinicalHistory.previousRxOd,
       previousAddOd: clinicalHistory.previousAddOd,
       previousRxOi: clinicalHistory.previousRxOi,
