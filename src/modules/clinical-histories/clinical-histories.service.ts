@@ -1,9 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  BadRequestException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
@@ -11,7 +8,6 @@ import { ClinicalHistory } from './entities/clinical-history.entity';
 import { CreateClinicalHistoryDto } from './dtos/create-clinical-history.dto';
 import { UpdateClinicalHistoryDto } from './dtos/update-clinical-history.dto';
 import { QueryClinicalHistoryDto } from './dtos/query-clinical-history.dto';
-import { ClinicalFormConfigService } from '../clinical-form-config/clinical-form-config.service';
 import { PaginationUtil } from '../../common/utils/pagination.util';
 
 @Injectable()
@@ -19,13 +15,9 @@ export class ClinicalHistoriesService {
   constructor(
     @InjectRepository(ClinicalHistory)
     private clinicalHistoryRepository: Repository<ClinicalHistory>,
-    @Inject(forwardRef(() => ClinicalFormConfigService))
-    private configService: ClinicalFormConfigService
   ) {}
 
   async create(createDto: CreateClinicalHistoryDto, branchId: string) {
-    await this.validateFieldsAgainstConfig(createDto, branchId);
-
     const clinicalHistory = this.clinicalHistoryRepository.create({
       ...createDto,
       branchId,
@@ -183,8 +175,6 @@ export class ClinicalHistoriesService {
       });
     }
 
-    await this.validateFieldsAgainstConfig(updateDto, branchId);
-
     Object.assign(clinicalHistory, updateDto);
     const savedHistory = await this.clinicalHistoryRepository.save(
       clinicalHistory
@@ -231,55 +221,6 @@ export class ClinicalHistoriesService {
       messageKey: 'SUCCESS.DELETE',
       message: 'Clinical history deleted successfully',
     };
-  }
-
-  private async validateFieldsAgainstConfig(
-    dto: CreateClinicalHistoryDto | UpdateClinicalHistoryDto,
-    branchId: string
-  ) {
-    try {
-      const config = await this.configService.getFormConfig(branchId);
-      const fieldsConfig = config.fieldsConfig;
-
-      const disabledFields: string[] = [];
-
-      Object.keys(fieldsConfig.sections).forEach((sectionKey) => {
-        const section = fieldsConfig.sections[sectionKey];
-        if (!section.visible) {
-          Object.keys(section.fields).forEach((fieldKey) => {
-            disabledFields.push(fieldKey);
-          });
-        } else {
-          Object.keys(section.fields).forEach((fieldKey) => {
-            if (!section.fields[fieldKey]) {
-              disabledFields.push(fieldKey);
-            }
-          });
-        }
-      });
-
-      const sentFields = Object.keys(dto).filter(
-        (key) => dto[key] !== undefined
-      );
-      const invalidFields = sentFields.filter((field) =>
-        disabledFields.includes(field)
-      );
-
-      if (invalidFields.length > 0) {
-        throw new BadRequestException({
-          messageKey: 'ERROR.VALIDATION',
-          message: `The following fields are disabled for this branch: ${invalidFields.join(
-            ', '
-          )}`,
-          disabledFields: invalidFields,
-        });
-      }
-    } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
-      console.warn('Failed to validate fields against config:', error.message);
-    }
   }
 
   private formatResponse(clinicalHistory: ClinicalHistory) {
