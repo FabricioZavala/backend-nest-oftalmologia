@@ -5,9 +5,7 @@ import { ClinicalHistoriesController } from './clinical-histories.controller';
 import { ClinicalHistory } from './entities/clinical-history.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ClinicalHistory]),
-  ],
+  imports: [TypeOrmModule.forFeature([ClinicalHistory])],
   controllers: [ClinicalHistoriesController],
   providers: [ClinicalHistoriesService],
   exports: [ClinicalHistoriesService],

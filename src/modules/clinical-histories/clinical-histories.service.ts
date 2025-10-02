@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { ClinicalHistory } from './entities/clinical-history.entity';
@@ -14,7 +11,7 @@ import { PaginationUtil } from '../../common/utils/pagination.util';
 export class ClinicalHistoriesService {
   constructor(
     @InjectRepository(ClinicalHistory)
-    private clinicalHistoryRepository: Repository<ClinicalHistory>,
+    private clinicalHistoryRepository: Repository<ClinicalHistory>
   ) {}
 
   async create(createDto: CreateClinicalHistoryDto, branchId: string) {
@@ -48,7 +45,6 @@ export class ClinicalHistoriesService {
       sortBy,
       sortOrder,
     } = queryDto;
-
 
     const queryBuilder = this.clinicalHistoryRepository
       .createQueryBuilder('ch')

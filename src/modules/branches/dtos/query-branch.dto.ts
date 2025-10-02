@@ -13,6 +13,30 @@ export class QueryBranchDto {
   search?: string;
 
   @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  code?: string;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  corporateEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @IsOptional()
   @IsBoolean()
   @Transform(({ value }) => value === 'true')
   isActive?: boolean;

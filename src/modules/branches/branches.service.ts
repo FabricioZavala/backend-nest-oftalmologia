@@ -74,6 +74,42 @@ export class BranchesService {
       );
     }
 
+    if (queryDto.name) {
+      queryBuilder.andWhere('branch.name ILIKE :name', {
+        name: `%${queryDto.name}%`,
+      });
+    }
+
+    if (queryDto.code) {
+      queryBuilder.andWhere('branch.code ILIKE :code', {
+        code: `%${queryDto.code}%`,
+      });
+    }
+
+    if (queryDto.city) {
+      queryBuilder.andWhere('branch.city ILIKE :city', {
+        city: `%${queryDto.city}%`,
+      });
+    }
+
+    if (queryDto.phone) {
+      queryBuilder.andWhere('branch.phone ILIKE :phone', {
+        phone: `%${queryDto.phone}%`,
+      });
+    }
+
+    if (queryDto.corporateEmail) {
+      queryBuilder.andWhere('branch.corporateEmail ILIKE :corporateEmail', {
+        corporateEmail: `%${queryDto.corporateEmail}%`,
+      });
+    }
+
+    if (queryDto.address) {
+      queryBuilder.andWhere('branch.address ILIKE :address', {
+        address: `%${queryDto.address}%`,
+      });
+    }
+
     if (queryDto.isActive !== undefined) {
       queryBuilder.andWhere('branch.isActive = :isActive', {
         isActive: queryDto.isActive,
