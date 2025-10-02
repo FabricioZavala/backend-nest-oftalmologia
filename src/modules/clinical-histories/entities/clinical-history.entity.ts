@@ -130,6 +130,9 @@ export class ClinicalHistory {
   lensTypes: string[]; 
 
   @Column({ type: 'jsonb', nullable: true })
+  additionalTreatments: string[];
+
+  @Column({ type: 'jsonb', nullable: true })
   pupillaryReflexes: {
     photomotor?: { od: string; oi: string };
     consensual?: { od: string; oi: string };

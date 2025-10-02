@@ -329,6 +329,7 @@ export class ClinicalHistoriesService {
       correctedAvOiVl: clinicalHistory.correctedAvOiVl,
       correctedAvOiVp: clinicalHistory.correctedAvOiVp,
       lensTypes: clinicalHistory.lensTypes,
+      additionalTreatments: clinicalHistory.additionalTreatments,
       pupillaryReflexes: clinicalHistory.pupillaryReflexes,
       ophthalmoscopyOd: clinicalHistory.ophthalmoscopyOd,
       ophthalmoscopyOi: clinicalHistory.ophthalmoscopyOi,

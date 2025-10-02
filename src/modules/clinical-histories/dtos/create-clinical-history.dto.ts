@@ -149,6 +149,10 @@ export class CreateClinicalHistoryDto {
   lensTypes?: string[];
 
   @IsOptional()
+  @IsArray()
+  additionalTreatments?: string[];
+
+  @IsOptional()
   @IsObject()
   pupillaryReflexes?: {
     photomotor?: { od: string; oi: string };
