@@ -143,7 +143,7 @@ export class ShiftsService {
       queryBuilder.andWhere('shift.appointmentDate <= :dateTo', { dateTo });
     }
 
-    queryBuilder.orderBy('shift.appointmentDate', 'ASC').skip(skip).take(take);
+    queryBuilder.orderBy('shift.createdAt', 'DESC').skip(skip).take(take);
 
     const [shifts, total] = await queryBuilder.getManyAndCount();
 
@@ -351,17 +351,28 @@ export class ShiftsService {
   }
 
   private async getDefaultStatus() {
-    const pendingStatus = await this.shiftStatusRepository.findOne({
-      where: { name: 'pending', isActive: true },
+    // ID del estado predeterminado (Pendiente, recordar cambiar si no se migra la data de esta db thiss)
+    const DEFAULT_STATUS_ID = '4d0671f6-97cf-40fd-8811-005f5fd4d03e';
+
+    let defaultStatus = await this.shiftStatusRepository.findOne({
+      where: { id: DEFAULT_STATUS_ID, isActive: true },
     });
 
-    if (!pendingStatus) {
-      throw new NotFoundException({
-        messageKey: 'ERROR.NOT_FOUND',
-        message: 'Default pending status not found',
+    if (!defaultStatus) {
+      defaultStatus = await this.shiftStatusRepository.findOne({
+        where: { isActive: true },
+        order: { createdAt: 'ASC' },
       });
     }
 
-    return pendingStatus;
+    if (!defaultStatus) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message:
+          'No active status found. Please create at least one shift status.',
+      });
+    }
+
+    return defaultStatus;
   }
 }
