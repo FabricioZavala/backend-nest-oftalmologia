@@ -1,0 +1,309 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { LaboratoryOrder } from './entities/laboratory-order.entity';
+import { ClinicalHistory } from '../clinical-histories/entities/clinical-history.entity';
+import { CreateLaboratoryOrderDto } from './dtos/create-laboratory-order.dto';
+import { UpdateLaboratoryOrderDto } from './dtos/update-laboratory-order.dto';
+import { QueryLaboratoryOrderDto } from './dtos/query-laboratory-order.dto';
+import { PaginationUtil } from '../../common/utils/pagination.util';
+
+@Injectable()
+export class LaboratoryOrdersService {
+  constructor(
+    @InjectRepository(LaboratoryOrder)
+    private laboratoryOrderRepository: Repository<LaboratoryOrder>,
+    @InjectRepository(ClinicalHistory)
+    private clinicalHistoryRepository: Repository<ClinicalHistory>
+  ) {}
+
+  async create(createDto: CreateLaboratoryOrderDto, branchId: string) {
+    const laboratoryOrder = this.laboratoryOrderRepository.create({
+      ...createDto,
+      branchId,
+    });
+
+    const savedOrder = await this.laboratoryOrderRepository.save(
+      laboratoryOrder
+    );
+
+    return this.formatResponse(savedOrder);
+  }
+
+  async findAll(queryDto: QueryLaboratoryOrderDto, branchId: string) {
+    const {
+      page,
+      limit,
+      userId,
+      isConfirmed,
+      search,
+      identification,
+      firstName,
+      lastName,
+      phone,
+      status,
+      dateFrom,
+      dateTo,
+      sortBy,
+      sortOrder,
+    } = queryDto;
+
+    const queryBuilder = this.laboratoryOrderRepository
+      .createQueryBuilder('lo')
+      .leftJoinAndSelect('lo.user', 'user')
+      .leftJoinAndSelect('lo.product', 'product')
+      .where('lo.branchId = :branchId', { branchId });
+
+    if (userId) {
+      queryBuilder.andWhere('lo.userId = :userId', { userId });
+    }
+
+    if (typeof isConfirmed === 'boolean') {
+      queryBuilder.andWhere('lo.isConfirmed = :isConfirmed', { isConfirmed });
+    }
+
+    if (identification) {
+      queryBuilder.andWhere('user.documentNumber ILIKE :identification', {
+        identification: `%${identification}%`,
+      });
+    }
+
+    if (firstName) {
+      queryBuilder.andWhere('user.firstName ILIKE :firstName', {
+        firstName: `%${firstName}%`,
+      });
+    }
+
+    if (lastName) {
+      queryBuilder.andWhere('user.lastName ILIKE :lastName', {
+        lastName: `%${lastName}%`,
+      });
+    }
+
+    if (phone) {
+      queryBuilder.andWhere(
+        '(user.mobilePhone ILIKE :phone OR user.homePhone ILIKE :phone)',
+        { phone: `%${phone}%` }
+      );
+    }
+
+    if (status) {
+      const isConfirmedValue =
+        status === 'confirmado' ? true : status === 'pendiente' ? false : null;
+      if (isConfirmedValue !== null) {
+        queryBuilder.andWhere('lo.isConfirmed = :statusFilter', {
+          statusFilter: isConfirmedValue,
+        });
+      }
+    }
+
+    if (dateFrom) {
+      queryBuilder.andWhere('lo.attendanceDate >= :dateFrom', { dateFrom });
+    }
+
+    if (dateTo) {
+      queryBuilder.andWhere('lo.attendanceDate <= :dateTo', { dateTo });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.documentNumber ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
+
+    queryBuilder.orderBy(`lo.${sortBy}`, sortOrder);
+
+    const [data, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return PaginationUtil.paginate(
+      data.map((item) => this.formatResponse(item)),
+      total,
+      { page, limit }
+    );
+  }
+
+  async findOne(id: string, branchId: string) {
+    const laboratoryOrder = await this.laboratoryOrderRepository.findOne({
+      where: { id, branchId },
+      relations: ['user', 'product'],
+    });
+
+    if (!laboratoryOrder) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Laboratory order not found',
+      });
+    }
+
+    return this.formatResponse(laboratoryOrder);
+  }
+
+  async update(
+    id: string,
+    updateDto: UpdateLaboratoryOrderDto,
+    branchId: string
+  ) {
+    const laboratoryOrder = await this.findOne(id, branchId);
+
+    if (!laboratoryOrder) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Laboratory order not found',
+      });
+    }
+
+    await this.laboratoryOrderRepository.update({ id, branchId }, updateDto);
+
+    const updatedOrder = await this.findOne(id, branchId);
+    return this.formatResponse(updatedOrder);
+  }
+
+  async changeStatus(id: string, isConfirmed: boolean, branchId: string) {
+    const laboratoryOrder = await this.findOne(id, branchId);
+
+    if (!laboratoryOrder) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Laboratory order not found',
+      });
+    }
+
+    await this.laboratoryOrderRepository.update(
+      { id, branchId },
+      { isConfirmed }
+    );
+
+    const updatedOrder = await this.findOne(id, branchId);
+    return this.formatResponse(updatedOrder);
+  }
+
+  async remove(id: string, branchId: string) {
+    const laboratoryOrder = await this.findOne(id, branchId);
+
+    if (!laboratoryOrder) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Laboratory order not found',
+      });
+    }
+
+    await this.laboratoryOrderRepository.delete({ id, branchId });
+
+    return {
+      messageKey: 'SUCCESS.DELETED',
+      message: 'Laboratory order deleted successfully',
+    };
+  }
+
+  async getDataFromClinicalHistory(
+    clinicalHistoryId: string,
+    branchId: string
+  ) {
+    const clinicalHistory = await this.clinicalHistoryRepository.findOne({
+      where: { id: clinicalHistoryId, branchId },
+      relations: ['user'],
+    });
+
+    if (!clinicalHistory) {
+      throw new NotFoundException({
+        messageKey: 'ERROR.NOT_FOUND',
+        message: 'Clinical history not found',
+      });
+    }
+
+    return {
+      clinicalHistoryId: clinicalHistory.id,
+      userId: clinicalHistory.userId,
+      firstName: clinicalHistory.user.firstName,
+      lastName: clinicalHistory.user.lastName,
+      documentNumber: clinicalHistory.user.documentNumber,
+      email: clinicalHistory.user.email,
+      mobilePhone: clinicalHistory.user.mobilePhone,
+      homePhone: clinicalHistory.user.homePhone,
+      odSphere: clinicalHistory.finalRxOdSphere,
+      odCylinder: clinicalHistory.finalRxOdCylinder,
+      odAxis: clinicalHistory.finalRxOdAxis,
+      odAdd: clinicalHistory.finalRxOdAdd,
+      oiSphere: clinicalHistory.finalRxOiSphere,
+      oiCylinder: clinicalHistory.finalRxOiCylinder,
+      oiAxis: clinicalHistory.finalRxOiAxis,
+      oiAdd: clinicalHistory.finalRxOiAdd,
+    };
+  }
+
+  private formatResponse(laboratoryOrder: any) {
+    return {
+      id: laboratoryOrder.id,
+      branchId: laboratoryOrder.branchId,
+      userId: laboratoryOrder.userId,
+      clinicalHistoryId: laboratoryOrder.clinicalHistoryId,
+      attendanceDate: laboratoryOrder.attendanceDate,
+      deliveryDate: laboratoryOrder.deliveryDate,
+      odSphere: laboratoryOrder.odSphere,
+      odCylinder: laboratoryOrder.odCylinder,
+      odAxis: laboratoryOrder.odAxis,
+      odAdd: laboratoryOrder.odAdd,
+      odHeight: laboratoryOrder.odHeight,
+      odDnp: laboratoryOrder.odDnp,
+      odCbase: laboratoryOrder.odCbase,
+      odSunDegree: laboratoryOrder.odSunDegree,
+      odPrism: laboratoryOrder.odPrism,
+      odBase: laboratoryOrder.odBase,
+      oiSphere: laboratoryOrder.oiSphere,
+      oiCylinder: laboratoryOrder.oiCylinder,
+      oiAxis: laboratoryOrder.oiAxis,
+      oiAdd: laboratoryOrder.oiAdd,
+      oiHeight: laboratoryOrder.oiHeight,
+      oiDnp: laboratoryOrder.oiDnp,
+      oiCbase: laboratoryOrder.oiCbase,
+      oiSunDegree: laboratoryOrder.oiSunDegree,
+      oiPrism: laboratoryOrder.oiPrism,
+      oiBase: laboratoryOrder.oiBase,
+      dVertex: laboratoryOrder.dVertex,
+      pantos: laboratoryOrder.pantos,
+      panora: laboratoryOrder.panora,
+      frameFit: laboratoryOrder.frameFit,
+      profile: laboratoryOrder.profile,
+      mid: laboratoryOrder.mid,
+      distVp: laboratoryOrder.distVp,
+      engraving: laboratoryOrder.engraving,
+      productId: laboratoryOrder.productId,
+      frameType: laboratoryOrder.frameType,
+      frameTypeDescription: laboratoryOrder.frameTypeDescription,
+      frameBrand: laboratoryOrder.frameBrand,
+      frameModel: laboratoryOrder.frameModel,
+      frameData: laboratoryOrder.frameData,
+      frameLargerDiameter: laboratoryOrder.frameLargerDiameter,
+      frameHorizontal: laboratoryOrder.frameHorizontal,
+      frameVertical: laboratoryOrder.frameVertical,
+      frameBridge: laboratoryOrder.frameBridge,
+      observations: laboratoryOrder.observations,
+      isConfirmed: laboratoryOrder.isConfirmed,
+      createdAt: laboratoryOrder.createdAt,
+      updatedAt: laboratoryOrder.updatedAt,
+      user: laboratoryOrder.user
+        ? {
+            id: laboratoryOrder.user.id,
+            firstName: laboratoryOrder.user.firstName,
+            lastName: laboratoryOrder.user.lastName,
+            documentNumber: laboratoryOrder.user.documentNumber,
+            email: laboratoryOrder.user.email,
+            mobilePhone: laboratoryOrder.user.mobilePhone,
+            homePhone: laboratoryOrder.user.homePhone,
+          }
+        : null,
+      product: laboratoryOrder.product
+        ? {
+            id: laboratoryOrder.product.id,
+            code: laboratoryOrder.product.code,
+            name: laboratoryOrder.product.name,
+            brand: laboratoryOrder.product.brand,
+          }
+        : null,
+    };
+  }
+}

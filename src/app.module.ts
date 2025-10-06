@@ -30,6 +30,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { ShiftManagementModule } from './modules/shift-management/shift-management.module';
 import { ClinicalFormConfigModule } from './modules/clinical-form-config/clinical-form-config.module';
 import { ClinicalHistoriesModule } from './modules/clinical-histories/clinical-histories.module';
+import { LaboratoryOrdersModule } from './modules/laboratory-orders/laboratory-orders.module';
 
 // Entities
 import { User } from './modules/users/entities/user.entity';
@@ -48,6 +49,7 @@ import { Shift } from './modules/shift-management/entities/shift.entity';
 import { ShiftStatus } from './modules/shift-management/entities/shift-status.entity';
 import { ClinicalFormConfig } from './modules/clinical-form-config/entities/clinical-form-config.entity';
 import { ClinicalHistory } from './modules/clinical-histories/entities/clinical-history.entity';
+import { LaboratoryOrder } from './modules/laboratory-orders/entities/laboratory-order.entity';
 
 @Module({
   imports: [
@@ -82,6 +84,7 @@ import { ClinicalHistory } from './modules/clinical-histories/entities/clinical-
           ShiftStatus,
           ClinicalFormConfig,
           ClinicalHistory,
+          LaboratoryOrder,
         ],
         synchronize: true,
         dropSchema: false,
@@ -104,6 +107,7 @@ import { ClinicalHistory } from './modules/clinical-histories/entities/clinical-
     ShiftManagementModule,
     ClinicalFormConfigModule,
     ClinicalHistoriesModule,
+    LaboratoryOrdersModule,
   ],
   providers: [
     {
