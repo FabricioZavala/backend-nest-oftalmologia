@@ -19,11 +19,7 @@ export class QueryLaboratoryOrderDto {
 
   @IsOptional()
   @IsString()
-  search?: string;
-
-  @IsOptional()
-  @IsString()
-  identification?: string;
+  cedula?: string;
 
   @IsOptional()
   @IsString()
@@ -35,19 +31,19 @@ export class QueryLaboratoryOrderDto {
 
   @IsOptional()
   @IsString()
-  phone?: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
-  status?: string;
+  mobilePhone?: string;
 
   @IsOptional()
   @IsString()
-  dateFrom?: string;
+  status?: string; 
 
   @IsOptional()
   @IsString()
-  dateTo?: string;
+  deliveryDate?: string;
 
   @IsOptional()
   @IsString()

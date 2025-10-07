@@ -36,14 +36,13 @@ export class LaboratoryOrdersService {
       limit,
       userId,
       isConfirmed,
-      search,
-      identification,
+      cedula,
       firstName,
       lastName,
-      phone,
+      email,
+      mobilePhone,
       status,
-      dateFrom,
-      dateTo,
+      deliveryDate,
       sortBy,
       sortOrder,
     } = queryDto;
@@ -62,9 +61,9 @@ export class LaboratoryOrdersService {
       queryBuilder.andWhere('lo.isConfirmed = :isConfirmed', { isConfirmed });
     }
 
-    if (identification) {
-      queryBuilder.andWhere('user.documentNumber ILIKE :identification', {
-        identification: `%${identification}%`,
+    if (cedula) {
+      queryBuilder.andWhere('user.documentNumber ILIKE :cedula', {
+        cedula: `%${cedula}%`,
       });
     }
 
@@ -80,16 +79,21 @@ export class LaboratoryOrdersService {
       });
     }
 
-    if (phone) {
-      queryBuilder.andWhere(
-        '(user.mobilePhone ILIKE :phone OR user.homePhone ILIKE :phone)',
-        { phone: `%${phone}%` }
-      );
+    if (email) {
+      queryBuilder.andWhere('user.email ILIKE :email', {
+        email: `%${email}%`,
+      });
+    }
+
+    if (mobilePhone) {
+      queryBuilder.andWhere('user.mobilePhone ILIKE :mobilePhone', {
+        mobilePhone: `%${mobilePhone}%`,
+      });
     }
 
     if (status) {
       const isConfirmedValue =
-        status === 'confirmado' ? true : status === 'pendiente' ? false : null;
+        status === 'sent' ? true : status === 'pending' ? false : null;
       if (isConfirmedValue !== null) {
         queryBuilder.andWhere('lo.isConfirmed = :statusFilter', {
           statusFilter: isConfirmedValue,
@@ -97,19 +101,10 @@ export class LaboratoryOrdersService {
       }
     }
 
-    if (dateFrom) {
-      queryBuilder.andWhere('lo.attendanceDate >= :dateFrom', { dateFrom });
-    }
-
-    if (dateTo) {
-      queryBuilder.andWhere('lo.attendanceDate <= :dateTo', { dateTo });
-    }
-
-    if (search) {
-      queryBuilder.andWhere(
-        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.documentNumber ILIKE :search)',
-        { search: `%${search}%` }
-      );
+    if (deliveryDate) {
+      queryBuilder.andWhere('lo.deliveryDate = :deliveryDate', {
+        deliveryDate,
+      });
     }
 
     queryBuilder.orderBy(`lo.${sortBy}`, sortOrder);
