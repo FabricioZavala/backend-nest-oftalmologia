@@ -31,7 +31,14 @@ export class LaboratoryOrdersController {
     @Body(ValidationPipe) createDto: CreateLaboratoryOrderDto,
     @BranchContext() branchId: string
   ) {
-    return this.laboratoryOrdersService.create(createDto, branchId);
+    
+    
+    try {
+      const result = await this.laboratoryOrdersService.create(createDto, branchId);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get('get-all')

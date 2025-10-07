@@ -24,9 +24,13 @@ export enum FrameType {
 @Index(['userId'])
 @Index(['isConfirmed'])
 @Index(['attendanceDate'])
+@Index(['orderNumber'], { unique: true })
 export class LaboratoryOrder {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ name: 'order_number', unique: true, nullable: true })
+  orderNumber: number;
 
   @Column({ name: 'branch_id' })
   branchId: string;
@@ -38,10 +42,10 @@ export class LaboratoryOrder {
   clinicalHistoryId: string;
 
   // Step 1: Datos del Cliente
-  @Column({ name: 'attendance_date', type: 'date' })
+  @Column({ name: 'attendance_date', type: 'date', nullable: true })
   attendanceDate: Date;
 
-  @Column({ name: 'delivery_date', type: 'date' })
+  @Column({ name: 'delivery_date', type: 'date', nullable: true })
   deliveryDate: Date;
 
   // Step 2: Productos (Medidas Ópticas)

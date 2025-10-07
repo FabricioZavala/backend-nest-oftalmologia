@@ -21,9 +21,9 @@ export class CreateLaboratoryOrderDto {
   @IsDateString()
   attendanceDate?: string;
 
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  deliveryDate: string;
+  deliveryDate?: string;
 
   @IsOptional()
   @IsString()

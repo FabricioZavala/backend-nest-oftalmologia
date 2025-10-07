@@ -18,23 +18,31 @@ export class LaboratoryOrdersService {
   ) {}
 
   async create(createDto: CreateLaboratoryOrderDto, branchId: string) {
-    const laboratoryOrder = this.laboratoryOrderRepository.create({
-      ...createDto,
-      branchId,
-    });
+    try {
+      const orderNumber = await this.generateOrderNumber();
 
-    const savedOrder = await this.laboratoryOrderRepository.save(
-      laboratoryOrder
-    );
+      const laboratoryOrder = this.laboratoryOrderRepository.create({
+        ...createDto,
+        branchId,
+        orderNumber,
+      });
 
-    if (createDto.clinicalHistoryId) {
-      await this.clinicalHistoryRepository.update(
-        { id: createDto.clinicalHistoryId, branchId },
-        { isSent: true }
+      const savedOrder = await this.laboratoryOrderRepository.save(
+        laboratoryOrder
       );
-    }
 
-    return this.formatResponse(savedOrder);
+      if (createDto.clinicalHistoryId) {
+        await this.clinicalHistoryRepository.update(
+          { id: createDto.clinicalHistoryId, branchId },
+          { isSent: true }
+        );
+      }
+
+      const response = this.formatResponse(savedOrder);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findAll(queryDto: QueryLaboratoryOrderDto, branchId: string) {
@@ -240,6 +248,7 @@ export class LaboratoryOrdersService {
   private formatResponse(laboratoryOrder: any) {
     return {
       id: laboratoryOrder.id,
+      orderNumber: laboratoryOrder.orderNumber,
       branchId: laboratoryOrder.branchId,
       userId: laboratoryOrder.userId,
       clinicalHistoryId: laboratoryOrder.clinicalHistoryId,
@@ -307,5 +316,22 @@ export class LaboratoryOrdersService {
           }
         : null,
     };
+  }
+
+  /**
+   * Genera un número de orden secuencial
+   * Busca el último número de orden y lo incrementa en 1
+   */
+  private async generateOrderNumber(): Promise<number> {
+    const lastOrder = await this.laboratoryOrderRepository.findOne({
+      where: {},
+      order: { orderNumber: 'DESC' },
+    });
+
+    if (!lastOrder || !lastOrder.orderNumber) {
+      return 1; // Primera orden
+    }
+
+    return lastOrder.orderNumber + 1;
   }
 }
