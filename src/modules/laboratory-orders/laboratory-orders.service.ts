@@ -27,6 +27,13 @@ export class LaboratoryOrdersService {
       laboratoryOrder
     );
 
+    if (createDto.clinicalHistoryId) {
+      await this.clinicalHistoryRepository.update(
+        { id: createDto.clinicalHistoryId, branchId },
+        { isSent: true }
+      );
+    }
+
     return this.formatResponse(savedOrder);
   }
 

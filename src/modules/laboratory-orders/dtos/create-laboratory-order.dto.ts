@@ -17,9 +17,9 @@ export class CreateLaboratoryOrderDto {
   @IsUUID()
   clinicalHistoryId?: string;
 
+  @IsOptional()
   @IsDateString()
-  @IsNotEmpty()
-  attendanceDate: string;
+  attendanceDate?: string;
 
   @IsDateString()
   @IsNotEmpty()
