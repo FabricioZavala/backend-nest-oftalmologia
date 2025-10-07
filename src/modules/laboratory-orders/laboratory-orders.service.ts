@@ -18,31 +18,44 @@ export class LaboratoryOrdersService {
   ) {}
 
   async create(createDto: CreateLaboratoryOrderDto, branchId: string) {
-    try {
-      const orderNumber = await this.generateOrderNumber();
+    const maxRetries = 3;
+    let lastError: any;
 
-      const laboratoryOrder = this.laboratoryOrderRepository.create({
-        ...createDto,
-        branchId,
-        orderNumber,
-      });
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const orderNumber = await this.generateOrderNumber();
 
-      const savedOrder = await this.laboratoryOrderRepository.save(
-        laboratoryOrder
-      );
+        const laboratoryOrder = this.laboratoryOrderRepository.create({
+          ...createDto,
+          branchId,
+          orderNumber,
+        });
 
-      if (createDto.clinicalHistoryId) {
-        await this.clinicalHistoryRepository.update(
-          { id: createDto.clinicalHistoryId, branchId },
-          { isSent: true }
+        const savedOrder = await this.laboratoryOrderRepository.save(
+          laboratoryOrder
         );
-      }
 
-      const response = this.formatResponse(savedOrder);
-      return response;
-    } catch (error) {
-      throw error;
+        if (createDto.clinicalHistoryId) {
+          await this.clinicalHistoryRepository.update(
+            { id: createDto.clinicalHistoryId, branchId },
+            { isSent: true }
+          );
+        }
+
+        const response = this.formatResponse(savedOrder);
+        return response;
+      } catch (error) {
+        lastError = error;
+        //  error de llave duplicada, reintentar
+        if (error.code === '23505' && attempt < maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+          continue;
+        }
+        throw error;
+      }
     }
+
+    throw lastError;
   }
 
   async findAll(queryDto: QueryLaboratoryOrderDto, branchId: string) {
@@ -318,20 +331,14 @@ export class LaboratoryOrdersService {
     };
   }
 
-  /**
-   * Genera un número de orden secuencial
-   * Busca el último número de orden y lo incrementa en 1
-   */
+
   private async generateOrderNumber(): Promise<number> {
-    const lastOrder = await this.laboratoryOrderRepository.findOne({
-      where: {},
-      order: { orderNumber: 'DESC' },
-    });
+    const result = await this.laboratoryOrderRepository
+      .createQueryBuilder('order')
+      .select('MAX(order.orderNumber)', 'maxOrderNumber')
+      .getRawOne();
 
-    if (!lastOrder || !lastOrder.orderNumber) {
-      return 1; // Primera orden
-    }
-
-    return lastOrder.orderNumber + 1;
+    const maxOrderNumber = result?.maxOrderNumber || 0;
+    return maxOrderNumber + 1;
   }
 }
