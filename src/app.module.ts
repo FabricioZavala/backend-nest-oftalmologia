@@ -31,6 +31,7 @@ import { ShiftManagementModule } from './modules/shift-management/shift-manageme
 import { ClinicalFormConfigModule } from './modules/clinical-form-config/clinical-form-config.module';
 import { ClinicalHistoriesModule } from './modules/clinical-histories/clinical-histories.module';
 import { LaboratoryOrdersModule } from './modules/laboratory-orders/laboratory-orders.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 // Entities
 import { User } from './modules/users/entities/user.entity';
@@ -108,6 +109,7 @@ import { LaboratoryOrder } from './modules/laboratory-orders/entities/laboratory
     ClinicalFormConfigModule,
     ClinicalHistoriesModule,
     LaboratoryOrdersModule,
+    DashboardModule,
   ],
   providers: [
     {
