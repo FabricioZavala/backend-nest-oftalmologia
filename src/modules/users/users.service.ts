@@ -35,6 +35,7 @@ export class UsersService {
       document_number,
       home_phone,
       mobile_phone,
+      dateOfBirth,
       ...userData
     } = createUserDto;
 
@@ -68,6 +69,7 @@ export class UsersService {
       documentNumber: document_number || userData.documentNumber,
       homePhone: home_phone || userData.homePhone,
       mobilePhone: mobile_phone || userData.mobilePhone,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       ...userData,
     };
 
@@ -263,7 +265,7 @@ export class UsersService {
       });
     }
 
-    const { password, username, email, ...updateData } = updateUserDto;
+    const { password, username, email, dateOfBirth, adress, document_number, home_phone, mobile_phone, ...updateData } = updateUserDto;
 
     if (username && username !== user.username) {
       const existingUser = await this.userRepository.findOne({
@@ -295,12 +297,25 @@ export class UsersService {
       passwordHash = await bcrypt.hash(password, saltRounds);
     }
 
-    await this.userRepository.update(id, {
+    const updateDataMapped = {
       username,
       email,
       passwordHash,
+      address: adress || updateData.address,
+      documentNumber: document_number || updateData.documentNumber,
+      homePhone: home_phone || updateData.homePhone,
+      mobilePhone: mobile_phone || updateData.mobilePhone,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
       ...updateData,
+    };
+
+    Object.keys(updateDataMapped).forEach(key => {
+      if (updateDataMapped[key] === undefined) {
+        delete updateDataMapped[key];
+      }
     });
+
+    await this.userRepository.update(id, updateDataMapped);
 
     const updatedUser = await this.userRepository.findOne({
       where: { id },

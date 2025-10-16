@@ -45,8 +45,9 @@ export class CreateUserDto {
   @MinLength(1)
   document_number?: string;
 
+  @IsOptional()
   @IsISO8601({ strict: true })
-  dateOfBirth: string;
+  dateOfBirth?: string;
 
   @IsString()
   mobilePhone: string;
