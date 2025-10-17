@@ -51,22 +51,6 @@ export class CreateLaboratoryOrderDto {
 
   @IsOptional()
   @IsString()
-  odCbase?: string;
-
-  @IsOptional()
-  @IsString()
-  odSunDegree?: string;
-
-  @IsOptional()
-  @IsString()
-  odPrism?: string;
-
-  @IsOptional()
-  @IsString()
-  odBase?: string;
-
-  @IsOptional()
-  @IsString()
   oiSphere?: string;
 
   @IsOptional()
@@ -91,19 +75,19 @@ export class CreateLaboratoryOrderDto {
 
   @IsOptional()
   @IsString()
-  oiCbase?: string;
+  cbase?: string;
 
   @IsOptional()
   @IsString()
-  oiSunDegree?: string;
+  sunDegree?: string;
 
   @IsOptional()
   @IsString()
-  oiPrism?: string;
+  prism?: string;
 
   @IsOptional()
   @IsString()
-  oiBase?: string;
+  base?: string;
 
   @IsOptional()
   @IsString()

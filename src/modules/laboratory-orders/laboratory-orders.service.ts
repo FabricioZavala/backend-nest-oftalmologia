@@ -42,11 +42,15 @@ export class LaboratoryOrdersService {
           );
         }
 
-        const response = this.formatResponse(savedOrder);
+        const orderWithRelations = await this.laboratoryOrderRepository.findOne({
+          where: { id: savedOrder.id },
+          relations: ['user', 'product'],
+        });
+
+        const response = this.formatResponse(orderWithRelations);
         return response;
       } catch (error) {
         lastError = error;
-        //  error de llave duplicada, reintentar
         if (error.code === '23505' && attempt < maxRetries - 1) {
           await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
           continue;
@@ -273,20 +277,16 @@ export class LaboratoryOrdersService {
       odAdd: laboratoryOrder.odAdd,
       odHeight: laboratoryOrder.odHeight,
       odDnp: laboratoryOrder.odDnp,
-      odCbase: laboratoryOrder.odCbase,
-      odSunDegree: laboratoryOrder.odSunDegree,
-      odPrism: laboratoryOrder.odPrism,
-      odBase: laboratoryOrder.odBase,
       oiSphere: laboratoryOrder.oiSphere,
       oiCylinder: laboratoryOrder.oiCylinder,
       oiAxis: laboratoryOrder.oiAxis,
       oiAdd: laboratoryOrder.oiAdd,
       oiHeight: laboratoryOrder.oiHeight,
       oiDnp: laboratoryOrder.oiDnp,
-      oiCbase: laboratoryOrder.oiCbase,
-      oiSunDegree: laboratoryOrder.oiSunDegree,
-      oiPrism: laboratoryOrder.oiPrism,
-      oiBase: laboratoryOrder.oiBase,
+      cbase: laboratoryOrder.cbase,
+      sunDegree: laboratoryOrder.sunDegree,
+      prism: laboratoryOrder.prism,
+      base: laboratoryOrder.base,
       dVertex: laboratoryOrder.dVertex,
       pantos: laboratoryOrder.pantos,
       panora: laboratoryOrder.panora,

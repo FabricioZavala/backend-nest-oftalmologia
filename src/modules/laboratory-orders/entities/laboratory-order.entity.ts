@@ -67,18 +67,6 @@ export class LaboratoryOrder {
   @Column({ name: 'od_dnp', nullable: true })
   odDnp: string;
 
-  @Column({ name: 'od_cbase', nullable: true })
-  odCbase: string;
-
-  @Column({ name: 'od_sun_degree', nullable: true })
-  odSunDegree: string;
-
-  @Column({ name: 'od_prism', nullable: true })
-  odPrism: string;
-
-  @Column({ name: 'od_base', nullable: true })
-  odBase: string;
-
   @Column({ name: 'oi_sphere', nullable: true })
   oiSphere: string;
 
@@ -97,19 +85,18 @@ export class LaboratoryOrder {
   @Column({ name: 'oi_dnp', nullable: true })
   oiDnp: string;
 
-  @Column({ name: 'oi_cbase', nullable: true })
-  oiCbase: string;
+  @Column({ name: 'cbase', nullable: true })
+  cbase: string;
 
-  @Column({ name: 'oi_sun_degree', nullable: true })
-  oiSunDegree: string;
+  @Column({ name: 'sun_degree', nullable: true })
+  sunDegree: string;
 
-  @Column({ name: 'oi_prism', nullable: true })
-  oiPrism: string;
+  @Column({ name: 'prism', nullable: true })
+  prism: string;
 
-  @Column({ name: 'oi_base', nullable: true })
-  oiBase: string;
+  @Column({ name: 'base', nullable: true })
+  base: string;
 
-  // Step 3: Parámetros de Diseño Individual
   @Column({ name: 'd_vertex', nullable: true })
   dVertex: string;
 
