@@ -143,5 +143,49 @@
   "ERROR.BOTH_PASSWORDS_REQUIRED": {
     "es": "Se requieren tanto la contraseña actual como la nueva para cambiar la contraseña",
     "en": "Both current password and new password are required for password change"
+  },
+  "ERROR.EMAIL_NOT_FOUND": {
+    "es": "El correo no existe en el sistema",
+    "en": "Email does not exist in the system"
+  },
+  "ERROR.EMAIL_SEND_FAILED": {
+    "es": "Error al enviar el correo de recuperación",
+    "en": "Failed to send recovery email"
+  },
+  "AUTH.RESET_EMAIL_SENT": {
+    "es": "Se ha enviado un enlace de restablecimiento a tu correo electrónico",
+    "en": "A password reset link has been sent to your email"
+  },
+  "AUTH.PASSWORD_CHANGED": {
+    "es": "Contraseña cambiada exitosamente",
+    "en": "Password changed successfully"
+  },
+  "AUTH.PASSWORD_RESET": {
+    "es": "La contraseña ha sido restablecida exitosamente",
+    "en": "Password has been reset successfully"
+  },
+  "ERROR.INVALID_OR_EXPIRED_TOKEN": {
+    "es": "Token inválido o expirado",
+    "en": "Invalid or expired token"
+  },
+  "ERROR.ADMIN_REQUIRED": {
+    "es": "Solo los usuarios administradores pueden realizar esta acción",
+    "en": "Only admin users can perform this action"
+  },
+  "ERROR.BRANCH_NOT_FOUND": {
+    "es": "Sucursal no encontrada",
+    "en": "Branch not found"
+  },
+  "ERROR.BRANCH_INACTIVE": {
+    "es": "La sucursal no está activa",
+    "en": "Branch is not active"
+  },
+  "AUTH.ADMIN_BRANCH_FILTER_SET": {
+    "es": "Filtro de sucursal establecido exitosamente",
+    "en": "Branch filter set successfully"
+  },
+  "AUTH.ADMIN_BRANCH_FILTER_CLEARED": {
+    "es": "Filtro de sucursal eliminado exitosamente",
+    "en": "Branch filter cleared successfully"
   }
 }

@@ -281,11 +281,10 @@ export class AuthService {
     });
 
     if (!user) {
-      return {
-        messageKey: 'AUTH.RESET_EMAIL_SENT',
-        message:
-          'If the email exists in our system, a reset link has been sent',
-      };
+      throw new NotFoundException({
+        messageKey: 'ERROR.EMAIL_NOT_FOUND',
+        message: 'El correo no existe en el sistema',
+      });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -299,11 +298,15 @@ export class AuthService {
       await this.emailUtil.sendResetPasswordEmail(user.email, resetToken);
     } catch (error) {
       this.logger.error('Failed to send reset email', error.message);
+      throw new BadRequestException({
+        messageKey: 'ERROR.EMAIL_SEND_FAILED',
+        message: 'Error al enviar el correo de recuperación',
+      });
     }
 
     return {
       messageKey: 'AUTH.RESET_EMAIL_SENT',
-      message: 'If the email exists in our system, a reset link has been sent',
+      message: 'Se ha enviado un enlace de restablecimiento a tu correo electrónico',
     };
   }
 
