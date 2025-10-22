@@ -11,15 +11,14 @@ export class EmailUtil {
       this.configService.get('FRONTEND_URL') || 'http://localhost:4200'
     }/auth/reset-password?token=${token}`;
 
-    // thiss - Configuración del servidor de correo SMTP
     const transporter = nodemailer.createTransport({
       host: this.configService.get('MAIL_HOST') || 'smtp.gmail.com',
       port: parseInt(this.configService.get('MAIL_PORT')) || 587,
       secure: this.configService.get('MAIL_SECURE') === 'true' || false,
       auth: {
-        // thiss - Credenciales del correo remitente (MAIL_USER y MAIL_PASS)
-        user: this.configService.get('MAIL_USER'), // thiss - Correo electrónico remitente
-        pass: this.configService.get('MAIL_PASS'), // thiss - Contraseña o App Password del correo
+
+        user: this.configService.get('MAIL_USER'), 
+        pass: this.configService.get('MAIL_PASS'),
       },
     });
 
@@ -32,9 +31,8 @@ export class EmailUtil {
       );
     }
 
-    // thiss - Configuración del mensaje de correo
     const mailOptions = {
-      from: this.configService.get('MAIL_USER'), // thiss - Correo electrónico remitente
+      from: this.configService.get('MAIL_USER'),
       to: email,
       subject: 'Restablecer contraseña - Sistema Oftalmología',
       html: this.getResetPasswordTemplate(resetUrl),
